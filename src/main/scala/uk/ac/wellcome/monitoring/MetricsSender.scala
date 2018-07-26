@@ -54,16 +54,15 @@ class MetricsSender @Inject()(amazonCloudWatch: AmazonCloudWatch,
     source
       .viaMat(materializer)(Keep.left)
       // Make sure we don't exceed aws rate limit
-      .throttle(
-        maxPutMetricDataRequestsPerSecond,
-        1 second,
-        0,
-        ThrottleMode.shaping)
+      .throttle(maxPutMetricDataRequestsPerSecond,
+                1 second,
+                0,
+                ThrottleMode.shaping)
       .to(sink)
       .run()
 
   def count[T](metricName: String, f: Future[T])(
-    implicit ec: ExecutionContext): Future[T] = {
+      implicit ec: ExecutionContext): Future[T] = {
     f.onComplete {
       case Success(_) => incrementCount(s"${metricName}_success")
       case Failure(_: GracefulFailureException) =>
@@ -84,7 +83,7 @@ class MetricsSender @Inject()(amazonCloudWatch: AmazonCloudWatch,
   }
 
   private def sendToStream(
-    metricDatum: MetricDatum
+      metricDatum: MetricDatum
   ): Future[QueueOfferResult] =
     sourceQueue.offer(metricDatum)
 }
