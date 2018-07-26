@@ -40,7 +40,7 @@ class MetricsSenderTest
 
   describe("count") {
     it("counts a successful future") {
-      withActorSystem { actorSystem =>
+      withMonitoringActorSystem { actorSystem =>
         val amazonCloudWatch = mock[AmazonCloudWatch]
         withMetricsSender(actorSystem, amazonCloudWatch) { metricsSender =>
           val expectedResult = "foo"
@@ -61,7 +61,7 @@ class MetricsSenderTest
     }
 
     it("counts a failed future") {
-      withActorSystem { actorSystem =>
+      withMonitoringActorSystem { actorSystem =>
         val amazonCloudWatch = mock[AmazonCloudWatch]
         withMetricsSender(actorSystem, amazonCloudWatch) { metricsSender =>
           val f = Future {
@@ -80,7 +80,7 @@ class MetricsSenderTest
     }
 
     it("counts a recognised failure") {
-      withActorSystem { actorSystem =>
+      withMonitoringActorSystem { actorSystem =>
         val amazonCloudWatch = mock[AmazonCloudWatch]
         withMetricsSender(actorSystem, amazonCloudWatch) { metricsSender =>
           val f = Future {
@@ -102,7 +102,7 @@ class MetricsSenderTest
 
 
     it("groups 20 MetricDatum into one PutMetricDataRequest") {
-      withActorSystem { actorSystem =>
+      withMonitoringActorSystem { actorSystem =>
         val amazonCloudWatch = mock[AmazonCloudWatch]
         withMetricsSender(actorSystem, amazonCloudWatch) { metricsSender =>
           val capture = ArgumentCaptor.forClass(classOf[PutMetricDataRequest])
@@ -129,7 +129,7 @@ class MetricsSenderTest
     }
 
     it("takes at least one second to make 150 PutMetricData requests") {
-      withActorSystem { actorSystem =>
+      withMonitoringActorSystem { actorSystem =>
         val amazonCloudWatch = mock[AmazonCloudWatch]
         withMetricsSender(actorSystem, amazonCloudWatch) { metricsSender =>
           val capture = ArgumentCaptor.forClass(classOf[PutMetricDataRequest])

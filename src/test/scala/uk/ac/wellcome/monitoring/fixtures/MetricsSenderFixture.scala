@@ -38,7 +38,6 @@ trait MetricsSenderFixture
   def withMockMetricSender[R] =
     fixture[MetricsSender, R](
       create = {
-
         val metricsSender = mock[MetricsSender]
         when(
           metricsSender.count(
