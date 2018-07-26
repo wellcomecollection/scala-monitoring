@@ -9,14 +9,13 @@ import org.mockito.ArgumentCaptor
 import org.scalatest.concurrent.{Eventually, ScalaFutures}
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.time.{Millis, Seconds, Span}
 import uk.ac.wellcome.monitoring.{MetricsConfig, MetricsSender}
-import uk.ac.wellcome.test.fixtures.Akka
-import uk.ac.wellcome.test.utils.ExtendedPatience
 
 import scala.collection.JavaConverters._
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{Future, Promise}
+import scala.concurrent.{Future, PatienceConfiguration, Promise}
 
 class MetricsSenderTest
     extends FunSpec
@@ -25,9 +24,12 @@ class MetricsSenderTest
     with ScalaFutures
     with Eventually
     with Akka
-    with ExtendedPatience {
+    with PatienceConfiguration {
 
-  import org.mockito.Mockito._
+  override implicit val patienceConfig: PatienceConfig = PatienceConfig(
+    timeout = scaled(Span(20, Seconds)),
+    interval = scaled(Span(150, Millis))
+  )
 
   describe("count") {
     it("counts a successful future") {

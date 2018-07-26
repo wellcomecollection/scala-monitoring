@@ -20,35 +20,39 @@ trait MetricsSenderFixture
 
   val QUEUE_RETRIES = 3
 
-  def withMetricsSender[R](actorSystem: ActorSystem,
-                           amazonCloudWatch: AmazonCloudWatch = cloudWatchClient,
-                           testWith: MetricsSender => R) = {
-    val metricsSender = new MetricsSender(
-      amazonCloudWatch = amazonCloudWatch,
-      actorSystem = actorSystem,
-      metricsConfig = MetricsConfig(
-        namespace = awsNamespace,
-        flushInterval = flushInterval
-      )
-    )
-    testWith(metricsSender)
-  }
-
-  def withMockMetricSender[R](testWith: MetricsSender => R) = {
-    val metricsSender = mock[MetricsSender]
-    when(
-      metricsSender.count(
-        anyString(),
-        any[Future[Unit]]()
-      )(any[ExecutionContext])
-    ).thenAnswer(new Answer[Future[Unit]] {
-      override def answer(invocation: InvocationOnMock): Future[Unit] = {
-        invocation.callRealMethod().asInstanceOf[Future[Unit]]
+  def withMetricsSender[R](actorSystem: ActorSystem, amazonCloudWatch: AmazonCloudWatch = cloudWatchClient) =
+    fixture[MetricsSender, R](
+      create = {
+        val metricsSender = new MetricsSender(
+          amazonCloudWatch = amazonCloudWatch,
+          actorSystem = actorSystem,
+          metricsConfig = MetricsConfig(
+            namespace = awsNamespace,
+            flushInterval = flushInterval
+          )
+        )
+        metricsSender
       }
-    })
+    )
 
-    testWith(metricsSender)
-  }
+  def withMockMetricSender[R] =
+    fixture[MetricsSender, R](
+      create = {
+
+        val metricsSender = mock[MetricsSender]
+        when(
+          metricsSender.count(
+            anyString(),
+            any[Future[Unit]]()
+          )(any[ExecutionContext])
+        ).thenAnswer(new Answer[Future[Unit]] {
+          override def answer(invocation: InvocationOnMock): Future[Unit] = {
+            invocation.callRealMethod().asInstanceOf[Future[Unit]]
+          }
+        })
+        metricsSender
+      }
+    )
 
   def assertSuccessMetricIncremented(mockMetricsSender: MetricsSender) = {
     verify(mockMetricsSender, times(1))
