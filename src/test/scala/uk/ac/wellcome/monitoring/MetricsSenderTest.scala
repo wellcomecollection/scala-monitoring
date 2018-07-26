@@ -1,4 +1,4 @@
-package uk.ac.wellcome.monitoring.test
+package uk.ac.wellcome.monitoring
 
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -14,8 +14,7 @@ import org.scalatest.concurrent.{
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FunSpec, Matchers}
 import org.scalatest.time.{Millis, Seconds, Span}
-import uk.ac.wellcome.monitoring.{MetricsConfig, MetricsSender}
-import uk.ac.wellcome.monitoring.fixtures.Akka
+import uk.ac.wellcome.monitoring.fixtures.{Akka, MetricsSenderFixture}
 
 import scala.collection.JavaConverters._
 import scala.concurrent.duration._
@@ -29,7 +28,10 @@ class MetricsSenderTest
     with ScalaFutures
     with Eventually
     with Akka
-    with PatienceConfiguration {
+    with PatienceConfiguration
+    with MetricsSenderFixture {
+
+  import org.mockito.Mockito._
 
   override implicit val patienceConfig: PatienceConfig = PatienceConfig(
     timeout = scaled(Span(20, Seconds)),
@@ -134,6 +136,7 @@ class MetricsSenderTest
 
     it("groups 20 MetricDatum into one PutMetricDataRequest") {
       withActorSystem { actorSystem =>
+        val amazonCloudWatch = mock[AmazonCloudWatch]
         withMetricsSender(actorSystem, amazonCloudWatch) { metricsSender =>
           val capture = ArgumentCaptor.forClass(classOf[PutMetricDataRequest])
 
@@ -160,6 +163,7 @@ class MetricsSenderTest
 
     it("takes at least one second to make 150 PutMetricData requests") {
       withActorSystem { actorSystem =>
+        val amazonCloudWatch = mock[AmazonCloudWatch]
         withMetricsSender(actorSystem, amazonCloudWatch) { metricsSender =>
           val capture = ArgumentCaptor.forClass(classOf[PutMetricDataRequest])
 

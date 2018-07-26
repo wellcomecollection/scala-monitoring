@@ -1,4 +1,4 @@
-package uk.ac.wellcome.monitoring.test.fixtures
+package uk.ac.wellcome.monitoring.fixtures
 
 import com.amazonaws.services.cloudwatch.AmazonCloudWatch
 import uk.ac.wellcome.monitoring.CloudWatchClientFactory

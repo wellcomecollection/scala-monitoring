@@ -1,15 +1,14 @@
-package uk.ac.wellcome.test
+package uk.ac.wellcome.monitoring
 
 import grizzled.slf4j.Logging
 
 import scala.util.Try
 
 package object fixtures extends Logging {
-
   type TestWith[T, R] = T => R
   type Fixture[L, R] = TestWith[L, R] => R
 
-  private[fixtures] def safeCleanup[L](resource: L)(f: L => Unit): Unit = {
+  private def safeCleanup[L](resource: L)(f: L => Unit): Unit = {
     Try {
       logger.debug(s"cleaning up resource=[$resource]")
       f(resource)
@@ -24,8 +23,7 @@ package object fixtures extends Logging {
 
   private val noop = (x: Any) => ()
 
-  private[fixtures] def fixture[L, R](create: => L,
-                                      destroy: L => Unit = noop): Fixture[L, R] =
+  private[monitoring] def fixture[L, R](create: => L, destroy: L => Unit = noop): Fixture[L, R] =
     (testWith: TestWith[L, R]) => {
       val loan = create
       logger.debug(s"created test resource=[$loan]")
