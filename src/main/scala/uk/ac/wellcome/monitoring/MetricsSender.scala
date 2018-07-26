@@ -69,7 +69,7 @@ class MetricsSender @Inject()(amazonCloudWatch: AmazonCloudWatch,
       case Failure(_)                             => "failure"
     }
 
-    val fullMetricName = "${metricName}_${metricSuffix}"
+    val fullMetricName = s"${metricName}_${metricSuffix}"
     incrementCount(fullMetricName)
 
     f
