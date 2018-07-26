@@ -43,8 +43,6 @@ class MetricsSenderTest
       withActorSystem { actorSystem =>
         val amazonCloudWatch = mock[AmazonCloudWatch]
         withMetricsSender(actorSystem, amazonCloudWatch) { metricsSender =>
-          val capture = ArgumentCaptor.forClass(classOf[PutMetricDataRequest])
-
           val expectedResult = "foo"
           val f = Future {
             expectedResult
@@ -55,17 +53,8 @@ class MetricsSenderTest
 
           whenReady(f) { result =>
             result shouldBe expectedResult
-            eventually {
-
-              verify(amazonCloudWatch, times(1)).putMetricData(capture.capture())
-
-              val putMetricDataRequest = capture.getValue
-              val metricData = putMetricDataRequest.getMetricData
-              metricData should have size 1
-              metricData.asScala.exists { metricDatum =>
-                (metricDatum.getValue == 1.0) && metricDatum.getMetricName == s"${metricName}_success"
-              } shouldBe true
-            }
+            assertSingleDataPoint(
+              amazonCloudWatch, metricName = s"${metricName}_success")
           }
         }
       }
@@ -75,8 +64,6 @@ class MetricsSenderTest
       withActorSystem { actorSystem =>
         val amazonCloudWatch = mock[AmazonCloudWatch]
         withMetricsSender(actorSystem, amazonCloudWatch) { metricsSender =>
-          val capture = ArgumentCaptor.forClass(classOf[PutMetricDataRequest])
-
           val f = Future {
             throw new RuntimeException()
           }
@@ -85,17 +72,8 @@ class MetricsSenderTest
           metricsSender.count(metricName, f)
 
           whenReady(f.failed) { _ =>
-            eventually {
-              verify(amazonCloudWatch, times(1)).putMetricData(capture.capture())
-
-              val putMetricDataRequest = capture.getValue
-              val metricData = putMetricDataRequest.getMetricData
-              metricData should have size 1
-
-              metricData.asScala.exists { metricDatum =>
-                (metricDatum.getValue == 1.0) && metricDatum.getMetricName == s"${metricName}_failure"
-              } shouldBe true
-            }
+            assertSingleDataPoint(
+              amazonCloudWatch, metricName = s"${metricName}_failure")
           }
         }
       }
@@ -105,8 +83,6 @@ class MetricsSenderTest
       withActorSystem { actorSystem =>
         val amazonCloudWatch = mock[AmazonCloudWatch]
         withMetricsSender(actorSystem, amazonCloudWatch) { metricsSender =>
-          val capture = ArgumentCaptor.forClass(classOf[PutMetricDataRequest])
-
           val f = Future {
             throw new RecognisedFailureException(
               new RuntimeException("AAARGH!")
@@ -117,17 +93,8 @@ class MetricsSenderTest
           metricsSender.count(metricName, f)
 
           whenReady(f.failed) { _ =>
-            eventually {
-              verify(amazonCloudWatch, times(1)).putMetricData(capture.capture())
-
-              val putMetricDataRequest = capture.getValue
-              val metricData = putMetricDataRequest.getMetricData
-              metricData should have size 1
-
-              metricData.asScala.exists { metricDatum =>
-                (metricDatum.getValue == 1.0) && metricDatum.getMetricName == s"${metricName}_recognisedFailure"
-              } shouldBe true
-            }
+            assertSingleDataPoint(
+              amazonCloudWatch, metricName = s"${metricName}_recognisedFailure")
           }
         }
       }
@@ -199,6 +166,20 @@ class MetricsSenderTest
           }
         }
       }
+    }
+  }
+
+  private def assertSingleDataPoint(amazonCloudWatch: AmazonCloudWatch, metricName: String) = {
+    val capture = ArgumentCaptor.forClass(classOf[PutMetricDataRequest])
+    eventually {
+      verify(amazonCloudWatch, times(1)).putMetricData(capture.capture())
+
+      val putMetricDataRequest = capture.getValue
+      val metricData = putMetricDataRequest.getMetricData
+      metricData should have size 1
+      metricData.asScala.exists { metricDatum =>
+        (metricDatum.getValue == 1.0) && metricDatum.getMetricName == metricName
+      } shouldBe true
     }
   }
 }
