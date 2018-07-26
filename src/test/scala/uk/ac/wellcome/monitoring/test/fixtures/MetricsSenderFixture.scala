@@ -1,6 +1,7 @@
 package uk.ac.wellcome.monitoring.test.fixtures
 
 import akka.actor.ActorSystem
+import com.amazonaws.services.cloudwatch.AmazonCloudWatch
 import grizzled.slf4j.Logging
 import org.mockito.Matchers.{any, anyString, endsWith}
 import org.mockito.Mockito.{never, times, verify, when}
@@ -20,10 +21,11 @@ trait MetricsSenderFixture
 
   val QUEUE_RETRIES = 3
 
-  def withMetricsSender[R](actorSystem: ActorSystem) =
+  def withMetricsSender[R](actorSystem: ActorSystem,
+                           amazonCloudWatch: AmazonCloudWatch = cloudWatchClient) =
     fixture[MetricsSender, R](
       create = new MetricsSender(
-        amazonCloudWatch = cloudWatchClient,
+        amazonCloudWatch = amazonCloudWatch,
         actorSystem = actorSystem,
         metricsConfig = MetricsConfig(
           namespace = awsNamespace,
@@ -64,10 +66,8 @@ trait MetricsSenderFixture
       .incrementCount(endsWith("_ProcessMessage_failure"))
   }
 
-  def assertGracefulFailureMetricIncremented(
-    mockMetricsSender: MetricsSender) = {
+  def assertRecognisedFailureMetricIncremented(
+    mockMetricsSender: MetricsSender) =
     verify(mockMetricsSender, times(QUEUE_RETRIES))
-      .incrementCount(endsWith("_gracefulFailure"))
-  }
-
+      .incrementCount(endsWith("_recognisedFailure"))
 }
