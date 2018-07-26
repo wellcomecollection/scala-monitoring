@@ -6,16 +6,21 @@ import java.time.temporal.ChronoUnit
 import com.amazonaws.services.cloudwatch.AmazonCloudWatch
 import com.amazonaws.services.cloudwatch.model.PutMetricDataRequest
 import org.mockito.ArgumentCaptor
-import org.scalatest.concurrent.{Eventually, ScalaFutures}
+import org.scalatest.concurrent.{
+  Eventually,
+  PatienceConfiguration,
+  ScalaFutures
+}
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FunSpec, Matchers}
 import org.scalatest.time.{Millis, Seconds, Span}
 import uk.ac.wellcome.monitoring.{MetricsConfig, MetricsSender}
+import uk.ac.wellcome.monitoring.fixtures.Akka
 
 import scala.collection.JavaConverters._
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{Future, PatienceConfiguration, Promise}
+import scala.concurrent.{Future, Promise}
 
 class MetricsSenderTest
     extends FunSpec
