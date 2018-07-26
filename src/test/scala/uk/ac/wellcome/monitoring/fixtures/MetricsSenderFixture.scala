@@ -9,7 +9,6 @@ import org.mockito.invocation.InvocationOnMock
 import org.mockito.stubbing.Answer
 import org.scalatest.mockito.MockitoSugar
 import uk.ac.wellcome.monitoring.{MetricsConfig, MetricsSender}
-import uk.ac.wellcome.monitoring.fixtures._
 
 import scala.concurrent.{ExecutionContext, Future}
 
