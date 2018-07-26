@@ -94,6 +94,39 @@ class MetricsSenderTest
       }
     }
 
+    it("counts a recognised failure") {
+      withActorSystem { actorSystem =>
+        val amazonCloudWatch = mock[AmazonCloudWatch]
+        withMetricsSender(actorSystem, amazonCloudWatch) { metricsSender =>
+          val capture = ArgumentCaptor.forClass(classOf[PutMetricDataRequest])
+
+          val f = Future {
+            throw new RecognisedFailureException(
+              new RuntimeException("AAARGH!")
+            )
+          }
+          val metricName = "bar"
+
+          metricsSender.count(metricName, f)
+
+          whenReady(f.failed) { _ =>
+            eventually {
+              verify(amazonCloudWatch, times(1)).putMetricData(capture.capture())
+
+              val putMetricDataRequest = capture.getValue
+              val metricData = putMetricDataRequest.getMetricData
+              metricData should have size 1
+
+              metricData.asScala.exists { metricDatum =>
+                (metricDatum.getValue == 1.0) && metricDatum.getMetricName == s"${metricName}_recognisedFailure"
+              } shouldBe true
+            }
+          }
+        }
+      }
+    }
+
+
     it("groups 20 MetricDatum into one PutMetricDataRequest") {
       withActorSystem { actorSystem =>
         withMetricsSender(actorSystem, amazonCloudWatch) { metricsSender =>
