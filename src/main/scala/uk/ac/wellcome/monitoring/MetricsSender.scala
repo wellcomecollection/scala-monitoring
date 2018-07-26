@@ -64,9 +64,9 @@ class MetricsSender @Inject()(amazonCloudWatch: AmazonCloudWatch,
   def count[T](metricName: String, f: Future[T])(
     implicit ec: ExecutionContext): Future[T] = {
     val metricSuffix = f.onComplete {
-      case Success(_) => "success"
+      case Success(_)                             => "success"
       case Failure(_: RecognisedFailureException) => "recognisedFailure"
-      case Failure(_) => "failure"
+      case Failure(_)                             => "failure"
     }
 
     val fullMetricName = "${metricName}_${metricSuffix}"
