@@ -61,6 +61,9 @@ class MetricsSender @Inject()(amazonCloudWatch: AmazonCloudWatch,
       .to(sink)
       .run()
 
+  @deprecated(
+    "Use one of the specific count{Success,RecognisedFailure,Failure} methods",
+    "messaging 1.0")
   def count[T](metricName: String, f: Future[T])(
     implicit ec: ExecutionContext): Future[T] = {
     f.onComplete {
