@@ -170,7 +170,7 @@ class MetricsSenderTest
   }
 
   private def createMetricName: String =
-    (Random.alphanumeric take length mkString) toLowerCase
+    (Random.alphanumeric take 10 mkString) toLowerCase
 
   private def assertSingleDataPoint(amazonCloudWatch: AmazonCloudWatch, metricName: String) = {
     val capture = ArgumentCaptor.forClass(classOf[PutMetricDataRequest])
