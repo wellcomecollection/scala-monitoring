@@ -13,7 +13,11 @@ scalacOptions ++= Seq(
   "UTF-8",
   "-Xlint",
   "-Xverify",
-  "-Xfatal-warnings",
+
+  // Commented out because I can't find a way to have fatal warnings and
+  // emit deprecations in code we test.  :sob:
+  // "-Xfatal-warnings",
+
   "-feature",
   "-language:postfixOps"
 )
