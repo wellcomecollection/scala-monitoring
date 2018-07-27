@@ -20,6 +20,7 @@ import scala.collection.JavaConverters._
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Future, Promise}
+import scala.util.Random
 
 class MetricsSenderTest
     extends FunSpec
@@ -47,7 +48,7 @@ class MetricsSenderTest
           val f = Future {
             expectedResult
           }
-          val metricName = "bar"
+          val metricName = createMetricName
 
           metricsSender.count(metricName, f)
 
@@ -67,7 +68,7 @@ class MetricsSenderTest
           val f = Future {
             throw new RuntimeException()
           }
-          val metricName = "bar"
+          val metricName = createMetricName
 
           metricsSender.count(metricName, f)
 
@@ -88,7 +89,7 @@ class MetricsSenderTest
               new RuntimeException("AAARGH!")
             )
           }
-          val metricName = "bar"
+          val metricName = createMetricName
 
           metricsSender.count(metricName, f)
 
@@ -100,7 +101,6 @@ class MetricsSenderTest
       }
     }
 
-
     it("groups 20 MetricDatum into one PutMetricDataRequest") {
       withMonitoringActorSystem { actorSystem =>
         val amazonCloudWatch = mock[AmazonCloudWatch]
@@ -108,7 +108,7 @@ class MetricsSenderTest
           val capture = ArgumentCaptor.forClass(classOf[PutMetricDataRequest])
 
           val f = Future.successful(())
-          val metricName = "bar"
+          val metricName = createMetricName
 
           val futures =
             (1 to 40).map(i => metricsSender.count(metricName, f))
@@ -135,7 +135,7 @@ class MetricsSenderTest
           val capture = ArgumentCaptor.forClass(classOf[PutMetricDataRequest])
 
           val f = Future.successful(())
-          val metricName = "bar"
+          val metricName = createMetricName
 
           val expectedDuration = (1 second).toMillis
           val startTime = Instant.now
@@ -168,6 +168,9 @@ class MetricsSenderTest
       }
     }
   }
+
+  private def createMetricName: String =
+    (Random.alphanumeric take length mkString) toLowerCase
 
   private def assertSingleDataPoint(amazonCloudWatch: AmazonCloudWatch, metricName: String) = {
     val capture = ArgumentCaptor.forClass(classOf[PutMetricDataRequest])
