@@ -128,6 +128,39 @@ class MetricsSenderTest
       }
     }
 
+    it("sends a success metric from countSuccess") {
+      val metricName = createMetricName
+      val expectedMetricName = s"${metricName}_success"
+
+      assertSendsSingleDataPoint(
+        metricName = metricName,
+        expectedMetricName = expectedMetricName,
+        f = metricsSender => metricsSender.countSuccess(metricName)
+      )
+    }
+
+    it("sends a recognised failure metric from countRecognisedFailure") {
+      val metricName = createMetricName
+      val expectedMetricName = s"${metricName}_recognisedFailure"
+
+      assertSendsSingleDataPoint(
+        metricName = metricName,
+        expectedMetricName = expectedMetricName,
+        f = metricsSender => metricsSender.countRecognisedFailure(metricName)
+      )
+    }
+
+    it("sends a failure metric from countFailure") {
+      val metricName = createMetricName
+      val expectedMetricName = s"${metricName}_failure"
+
+      assertSendsSingleDataPoint(
+        metricName = metricName,
+        expectedMetricName = expectedMetricName,
+        f = metricsSender => metricsSender.countFailure(metricName)
+      )
+    }
+
     it("takes at least one second to make 150 PutMetricData requests") {
       withMonitoringActorSystem { actorSystem =>
         val amazonCloudWatch = mock[AmazonCloudWatch]
@@ -171,6 +204,22 @@ class MetricsSenderTest
 
   private def createMetricName: String =
     (Random.alphanumeric take 10 mkString) toLowerCase
+
+  private def assertSendsSingleDataPoint[T](
+    metricName: String,
+    expectedMetricName: String,
+    f: (MetricsSender) => Future[T]
+  ) = {
+    withMonitoringActorSystem { actorSystem =>
+      val amazonCloudWatch = mock[AmazonCloudWatch]
+      withMetricsSender(actorSystem, amazonCloudWatch) { metricsSender =>
+        whenReady(f(metricsSender)) { _ =>
+          assertSingleDataPoint(
+            amazonCloudWatch, metricName = expectedMetricName)
+        }
+      }
+    }
+  }
 
   private def assertSingleDataPoint(amazonCloudWatch: AmazonCloudWatch, metricName: String) = {
     val capture = ArgumentCaptor.forClass(classOf[PutMetricDataRequest])
