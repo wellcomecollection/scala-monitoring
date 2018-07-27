@@ -68,8 +68,8 @@ class MetricsSender @Inject()(amazonCloudWatch: AmazonCloudWatch,
     implicit ec: ExecutionContext): Future[T] = {
     f.onComplete {
       case Success(_) => countSuccess(metricName)
-      case Failure(_: RecognisedFailureException)
-                      => countRecognisedFailure(metricName)
+      case Failure(_: RecognisedFailureException) =>
+        countRecognisedFailure(metricName)
       case Failure(_) => countFailure(metricName)
     }
 
