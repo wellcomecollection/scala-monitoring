@@ -20,6 +20,7 @@ import scala.collection.JavaConverters._
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Future, Promise}
+import scala.util.Random
 
 class MetricsSenderTest
     extends FunSpec
@@ -47,7 +48,7 @@ class MetricsSenderTest
           val f = Future {
             expectedResult
           }
-          val metricName = "bar"
+          val metricName = createMetricName
 
           metricsSender.count(metricName, f)
 
@@ -67,7 +68,7 @@ class MetricsSenderTest
           val f = Future {
             throw new RuntimeException()
           }
-          val metricName = "bar"
+          val metricName = createMetricName
 
           metricsSender.count(metricName, f)
 
@@ -88,7 +89,7 @@ class MetricsSenderTest
               new RuntimeException("AAARGH!")
             )
           }
-          val metricName = "bar"
+          val metricName = createMetricName
 
           metricsSender.count(metricName, f)
 
@@ -100,7 +101,6 @@ class MetricsSenderTest
       }
     }
 
-
     it("groups 20 MetricDatum into one PutMetricDataRequest") {
       withMonitoringActorSystem { actorSystem =>
         val amazonCloudWatch = mock[AmazonCloudWatch]
@@ -108,7 +108,7 @@ class MetricsSenderTest
           val capture = ArgumentCaptor.forClass(classOf[PutMetricDataRequest])
 
           val f = Future.successful(())
-          val metricName = "bar"
+          val metricName = createMetricName
 
           val futures =
             (1 to 40).map(i => metricsSender.count(metricName, f))
@@ -128,6 +128,39 @@ class MetricsSenderTest
       }
     }
 
+    it("sends a success metric from countSuccess") {
+      val metricName = createMetricName
+      val expectedMetricName = s"${metricName}_success"
+
+      assertSendsSingleDataPoint(
+        metricName = metricName,
+        expectedMetricName = expectedMetricName,
+        f = metricsSender => metricsSender.countSuccess(metricName)
+      )
+    }
+
+    it("sends a recognised failure metric from countRecognisedFailure") {
+      val metricName = createMetricName
+      val expectedMetricName = s"${metricName}_recognisedFailure"
+
+      assertSendsSingleDataPoint(
+        metricName = metricName,
+        expectedMetricName = expectedMetricName,
+        f = metricsSender => metricsSender.countRecognisedFailure(metricName)
+      )
+    }
+
+    it("sends a failure metric from countFailure") {
+      val metricName = createMetricName
+      val expectedMetricName = s"${metricName}_failure"
+
+      assertSendsSingleDataPoint(
+        metricName = metricName,
+        expectedMetricName = expectedMetricName,
+        f = metricsSender => metricsSender.countFailure(metricName)
+      )
+    }
+
     it("takes at least one second to make 150 PutMetricData requests") {
       withMonitoringActorSystem { actorSystem =>
         val amazonCloudWatch = mock[AmazonCloudWatch]
@@ -135,7 +168,7 @@ class MetricsSenderTest
           val capture = ArgumentCaptor.forClass(classOf[PutMetricDataRequest])
 
           val f = Future.successful(())
-          val metricName = "bar"
+          val metricName = createMetricName
 
           val expectedDuration = (1 second).toMillis
           val startTime = Instant.now
@@ -164,6 +197,25 @@ class MetricsSenderTest
             val gap: Long = ChronoUnit.MILLIS.between(startTime, endTime)
             gap shouldBe >(expectedDuration)
           }
+        }
+      }
+    }
+  }
+
+  private def createMetricName: String =
+    (Random.alphanumeric take 10 mkString) toLowerCase
+
+  private def assertSendsSingleDataPoint[T](
+    metricName: String,
+    expectedMetricName: String,
+    f: (MetricsSender) => Future[T]
+  ) = {
+    withMonitoringActorSystem { actorSystem =>
+      val amazonCloudWatch = mock[AmazonCloudWatch]
+      withMetricsSender(actorSystem, amazonCloudWatch) { metricsSender =>
+        whenReady(f(metricsSender)) { _ =>
+          assertSingleDataPoint(
+            amazonCloudWatch, metricName = expectedMetricName)
         }
       }
     }
