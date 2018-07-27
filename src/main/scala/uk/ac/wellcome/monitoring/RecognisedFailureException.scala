@@ -7,6 +7,6 @@ package uk.ac.wellcome.monitoring
   */
 @deprecated(
   "This is only used for control flow in MetricsSender.count, which is deprecated",
-  "messaging 1.0")
+  "messaging 1.1")
 case class RecognisedFailureException(e: Throwable)
     extends Exception(e.getMessage)
