@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## v1.1.1 - 2018-07-31
+
+This patch changes `MetricsSenderTest` to use IntegrationPatience like our
+other tests, rather than unncessarily setting custom PatienceConfiguration.
+
 ## v1.1.0 - 2018-07-27
 
 This add three new methods to MetricsSender that can directly decide which
