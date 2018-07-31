@@ -8,12 +8,11 @@ import com.amazonaws.services.cloudwatch.model.PutMetricDataRequest
 import org.mockito.ArgumentCaptor
 import org.scalatest.concurrent.{
   Eventually,
-  PatienceConfiguration,
+  IntegrationPatience,
   ScalaFutures
 }
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FunSpec, Matchers}
-import org.scalatest.time.{Millis, Seconds, Span}
 import uk.ac.wellcome.monitoring.fixtures.{Akka, MetricsSenderFixture}
 
 import scala.collection.JavaConverters._
@@ -29,15 +28,10 @@ class MetricsSenderTest
     with ScalaFutures
     with Eventually
     with Akka
-    with PatienceConfiguration
+    with IntegrationPatience
     with MetricsSenderFixture {
 
   import org.mockito.Mockito._
-
-  override implicit val patienceConfig: PatienceConfig = PatienceConfig(
-    timeout = scaled(Span(20, Seconds)),
-    interval = scaled(Span(150, Millis))
-  )
 
   describe("count") {
     it("counts a successful future") {
