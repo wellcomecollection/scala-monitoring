@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v1.2.0 - 2019-01-10
+
+This release removes Guice from the dependency list.
+
 ## v1.1.1 - 2018-07-31
 
 This patch changes `MetricsSenderTest` to use IntegrationPatience like our
