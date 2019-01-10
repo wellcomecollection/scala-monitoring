@@ -13,16 +13,15 @@ import akka.stream.{
 }
 import com.amazonaws.services.cloudwatch.AmazonCloudWatch
 import com.amazonaws.services.cloudwatch.model._
-import com.google.inject.Inject
 import grizzled.slf4j.Logging
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 import scala.util.{Failure, Success}
 
-class MetricsSender @Inject()(amazonCloudWatch: AmazonCloudWatch,
-                              actorSystem: ActorSystem,
-                              metricsConfig: MetricsConfig)
+class MetricsSender(amazonCloudWatch: AmazonCloudWatch,
+                    actorSystem: ActorSystem,
+                    metricsConfig: MetricsConfig)
     extends Logging {
 
   implicit val system = actorSystem
