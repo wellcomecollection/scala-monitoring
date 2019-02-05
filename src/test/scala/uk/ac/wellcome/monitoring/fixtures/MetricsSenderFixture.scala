@@ -1,6 +1,7 @@
 package uk.ac.wellcome.monitoring.fixtures
 
 import akka.actor.ActorSystem
+import akka.stream.QueueOfferResult
 import com.amazonaws.services.cloudwatch.AmazonCloudWatch
 import grizzled.slf4j.Logging
 import org.mockito.Matchers.{any, anyString, endsWith}
@@ -8,6 +9,7 @@ import org.mockito.Mockito.{never, times, verify, when}
 import org.mockito.invocation.InvocationOnMock
 import org.mockito.stubbing.Answer
 import org.scalatest.mockito.MockitoSugar
+import uk.ac.wellcome.fixtures._
 import uk.ac.wellcome.monitoring.{MetricsConfig, MetricsSender}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -20,7 +22,9 @@ trait MetricsSenderFixture
 
   val QUEUE_RETRIES = 3
 
-  def withMetricsSender[R](actorSystem: ActorSystem, amazonCloudWatch: AmazonCloudWatch = cloudWatchClient) =
+  def withMetricsSender[R](
+    actorSystem: ActorSystem,
+    amazonCloudWatch: AmazonCloudWatch = cloudWatchClient): Fixture[MetricsSender, R] =
     fixture[MetricsSender, R](
       create = {
         val metricsSender = new MetricsSender(
@@ -35,7 +39,7 @@ trait MetricsSenderFixture
       }
     )
 
-  def withMockMetricSender[R] =
+  def withMockMetricSender[R]: Fixture[MetricsSender, R] =
     fixture[MetricsSender, R](
       create = {
         val metricsSender = mock[MetricsSender]
@@ -53,23 +57,20 @@ trait MetricsSenderFixture
       }
     )
 
-  def assertSuccessMetricIncremented(mockMetricsSender: MetricsSender) = {
+  def assertSuccessMetricIncremented(mockMetricsSender: MetricsSender): Future[QueueOfferResult] =
     verify(mockMetricsSender, times(1))
       .incrementCount(endsWith("_ProcessMessage_success"))
-  }
 
-  def assertFailureMetricIncremented(mockMetricsSender: MetricsSender) = {
+  def assertFailureMetricIncremented(mockMetricsSender: MetricsSender): Future[QueueOfferResult] =
     verify(mockMetricsSender, times(QUEUE_RETRIES))
       .incrementCount(endsWith("_ProcessMessage_failure"))
-  }
 
-  def assertFailureMetricNotIncremented(mockMetricsSender: MetricsSender) = {
+  def assertFailureMetricNotIncremented(mockMetricsSender: MetricsSender): Future[QueueOfferResult] =
     verify(mockMetricsSender, never())
       .incrementCount(endsWith("_ProcessMessage_failure"))
-  }
 
   def assertRecognisedFailureMetricIncremented(
-    mockMetricsSender: MetricsSender) =
+    mockMetricsSender: MetricsSender): Future[QueueOfferResult] =
     verify(mockMetricsSender, times(QUEUE_RETRIES))
       .incrementCount(endsWith("_recognisedFailure"))
 }
