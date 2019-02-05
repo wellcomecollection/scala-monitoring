@@ -28,4 +28,8 @@ publishTo := Some(
   "S3 releases" at "s3://releases.mvn-repo.wellcomecollection.org/"
 )
 
+resolvers ++= Seq(
+  "S3 releases" at "s3://releases.mvn-repo.wellcomecollection.org/"
+)
+
 publishArtifact in Test := true
