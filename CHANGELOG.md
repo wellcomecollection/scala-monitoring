@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v1.2.1 - 2019-02-05
+
+Start using the scala-fixtures lib rather than vendoring fixtures.
+
 ## v1.2.0 - 2019-01-10
 
 This release removes Guice from the dependency list.
