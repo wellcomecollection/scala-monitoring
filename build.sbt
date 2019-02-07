@@ -40,10 +40,6 @@ val settings: Seq[Def.Setting[_]] = Seq(
   version := projectVersion
 )
 
-lazy val typesafeDependencies = Seq[ModuleID](
-  "uk.ac.wellcome" % "typesafe-app_2.12" % "1.0.0"
-)
-
 lazy val lib =
   project
     .withId(projectName)

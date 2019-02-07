@@ -3,11 +3,17 @@ import sbt._
 object WellcomeDependencies {
   private lazy val versions = new {
     val fixtures = "1.0.0"
+    val typesafe = "1.0.0"
   }
 
   val fixturesLibrary: Seq[ModuleID] = Seq(
     "uk.ac.wellcome" % "fixtures_2.12" % versions.fixtures % "test",
     "uk.ac.wellcome" % "fixtures_2.12" % versions.fixtures % "test" classifier "tests"
+  )
+
+  val typesafeLibrary = Seq[ModuleID](
+    "uk.ac.wellcome" % "typesafe-app_2.12" % typesafe,
+    "uk.ac.wellcome" % "typesafe-app_2.12" % typesafe % "test" classifier "tests",
   )
 }
 
@@ -47,4 +53,6 @@ object Dependencies {
     testDependencies ++
     akkaDependencies ++
     WellcomeDependencies.fixturesLibrary
+
+  val typesafeDependencies = WellcomeDependencies.typesafeLibrary
 }
