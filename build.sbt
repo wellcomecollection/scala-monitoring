@@ -55,4 +55,10 @@ lazy val lib_typesafe =
     .dependsOn(lib % "compile->compile;test->test")
     .settings(libraryDependencies ++= Dependencies.typesafeDependencies)
 
-lazy val root = (project in file(".")).aggregate(lib, lib_typesafe)
+lazy val root = (project in file("."))
+  .aggregate(lib, lib_typesafe)
+  .settings(Seq(
+    // We don't want to publish the aggregate project, just the sub projects.
+    // See https://stackoverflow.com/a/34004336/1558022
+    publishArtifact := false
+  ))
