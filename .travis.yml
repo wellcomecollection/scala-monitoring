@@ -33,10 +33,9 @@ env:
 jobs:
   include:
     - stage: format
-      env: TASK=autoformat
+      env: TASK=format
     - stage: test
       env: TASK=test
-    - env: TASK=check_release_file
     - stage: release
       env: TASK=release
 
