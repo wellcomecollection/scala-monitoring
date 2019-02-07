@@ -260,8 +260,8 @@ def update_changelog_and_version():
     #
     lines = list(open(BUILD_SBT))
     for idx, l in enumerate(lines):
-        if l.startswith('val version = '):
-            lines[idx] = 'val version = "%s"\n' % new_version_string.strip('v')
+        if l.startswith('val projectVersion = '):
+            lines[idx] = 'val projectVersion = "%s"\n' % new_version_string.strip('v')
             break
     else:  # no break
         raise RuntimeError('Never updated version in build.sbt?')

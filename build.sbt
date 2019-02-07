@@ -1,5 +1,5 @@
-val name = "monitoring"
-val version = "1.2.1"
+val projectName = "monitoring"
+val projectVersion = "1.2.1"
 
 
 
@@ -37,7 +37,7 @@ val settings: Seq[Def.Setting[_]] = Seq(
   ),
   publishArtifact in Test := true,
 
-  version := version
+  version := projectVersion
 )
 
 lazy val typesafeDependencies = Seq[ModuleID](
@@ -46,15 +46,15 @@ lazy val typesafeDependencies = Seq[ModuleID](
 
 lazy val lib =
   project
-    .withId(name)
-    .in(new File(name))
+    .withId(projectName)
+    .in(new File(projectName))
     .settings(settings)
     .settings(libraryDependencies ++= Dependencies.libraryDependencies)
 
 lazy val lib_typesafe =
   project
-    .withId(s"${name}_typesafe")
-    .in(new File(s"${name}_typesafe"))
+    .withId(s"${projectName}_typesafe")
+    .in(new File(s"${projectName}_typesafe"))
     .settings(settings)
     .dependsOn(lib % "compile->compile;test->test")
     .settings(libraryDependencies ++= typesafeDependencies)
