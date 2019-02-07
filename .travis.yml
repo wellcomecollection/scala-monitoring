@@ -4,6 +4,13 @@ before_script:
   - openssl aes-256-cbc -K $encrypted_83630750896a_key -iv $encrypted_83630750896a_iv -in secrets.zip.enc -out secrets.zip -d
   - git remote add ssh-origin "git@github.com:wellcometrust/scala-monitoring.git"
 
+cache:
+  directories:
+    - $HOME/.sbt
+    - $HOME/.ivy2/cache
+    - project/target
+    - monitoring/target
+    - monitoring_typesafe/target
 
 
 # Everything below this line is boilerplate that should be reusable,
@@ -13,13 +20,6 @@ sudo: false
 
 scala:
 - 2.12.6
-
-cache:
-  directories:
-    - $HOME/.sbt
-    - $HOME/.ivy2/cache
-    - project/target
-    - target
 
 branches:
   only:
@@ -33,10 +33,9 @@ env:
 jobs:
   include:
     - stage: format
-      env: TASK=autoformat
+      env: TASK=format
     - stage: test
       env: TASK=test
-    - env: TASK=check_release_file
     - stage: release
       env: TASK=release
 
