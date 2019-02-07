@@ -12,8 +12,8 @@ object WellcomeDependencies {
   )
 
   val typesafeLibrary = Seq[ModuleID](
-    "uk.ac.wellcome" % "typesafe-app_2.12" % typesafe,
-    "uk.ac.wellcome" % "typesafe-app_2.12" % typesafe % "test" classifier "tests",
+    "uk.ac.wellcome" % "typesafe-app_2.12" % versions.typesafe,
+    "uk.ac.wellcome" % "typesafe-app_2.12" % versions.typesafe % "test" classifier "tests",
   )
 }
 
