@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v1.3.0 - 2019-02-08
+
+This release adds the `monitoring_typesafe` library for configuring the `monitoring` library using Typesafe.
+
 ## v1.2.1 - 2019-02-05
 
 Start using the scala-fixtures lib rather than vendoring fixtures.
