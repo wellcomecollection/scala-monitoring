@@ -59,6 +59,6 @@ lazy val root = (project in file("."))
   .aggregate(lib, lib_typesafe)
   .settings(Seq(
     // We don't want to publish the aggregate project, just the sub projects.
-    // See https://stackoverflow.com/a/34004336/1558022
-    publishArtifact := false
+    // See https://stackoverflow.com/a/46986683/1558022
+    skip in publish := true
   ))
