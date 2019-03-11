@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v2.0.0 - 2019-03-11
+
+This release cleans up MetricsSender, strips out some deprecated methods and generally tidies up the library.
+
 ## v1.3.0 - 2019-02-08
 
 This release adds the `monitoring_typesafe` library for configuring the `monitoring` library using Typesafe.
