@@ -8,7 +8,7 @@ import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 
 import scala.concurrent.duration._
 
-object MetricsSenderBuilder {
+object MetricsBuilder {
   def buildMetricsConfig(config: Config): MetricsConfig = {
     val namespace =
       config.getOrElse[String]("aws.metrics.namespace")(default = "")
@@ -27,7 +27,6 @@ object MetricsSenderBuilder {
   )(implicit actorSystem: ActorSystem): MetricsSender =
     new MetricsSender(
       cloudWatchClient = cloudWatchClient,
-      actorSystem = actorSystem,
       metricsConfig = metricsConfig
     )
 
