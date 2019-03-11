@@ -59,15 +59,6 @@ class MetricsSender(amazonCloudWatch: AmazonCloudWatch,
       .to(sink)
       .run()
 
-  def countSuccess(metricName: String): Future[QueueOfferResult] =
-    incrementCount(s"${metricName}_success")
-
-  def countRecognisedFailure(metricName: String): Future[QueueOfferResult] =
-    incrementCount(s"${metricName}_recognisedFailure")
-
-  def countFailure(metricName: String): Future[QueueOfferResult] =
-    incrementCount(s"${metricName}_failure")
-
   def incrementCount(metricName: String): Future[QueueOfferResult] = {
     val metricDatum = new MetricDatum()
       .withMetricName(metricName)

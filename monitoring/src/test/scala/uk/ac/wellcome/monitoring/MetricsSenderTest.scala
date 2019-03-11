@@ -74,44 +74,6 @@ class MetricsSenderTest
     }
   }
 
-  describe("count") {
-
-    it("sends a success metric from countSuccess") {
-      val metricName = createMetricName
-      val expectedMetricName = s"${metricName}_success"
-
-      assertSendsSingleDataPoint(
-        metricName = metricName,
-        expectedMetricName = expectedMetricName,
-        f = metricsSender => metricsSender.countSuccess(metricName)
-      )
-    }
-
-    it("sends a recognised failure metric from countRecognisedFailure") {
-      val metricName = createMetricName
-      val expectedMetricName = s"${metricName}_recognisedFailure"
-
-      assertSendsSingleDataPoint(
-        metricName = metricName,
-        expectedMetricName = expectedMetricName,
-        f = metricsSender => metricsSender.countRecognisedFailure(metricName)
-      )
-    }
-
-    it("sends a failure metric from countFailure") {
-      val metricName = createMetricName
-      val expectedMetricName = s"${metricName}_failure"
-
-      assertSendsSingleDataPoint(
-        metricName = metricName,
-        expectedMetricName = expectedMetricName,
-        f = metricsSender => metricsSender.countFailure(metricName)
-      )
-    }
-
-
-  }
-
   it("takes at least one second to make 150 PutMetricData requests") {
     withMonitoringActorSystem { actorSystem =>
       val amazonCloudWatch = mock[AmazonCloudWatch]
