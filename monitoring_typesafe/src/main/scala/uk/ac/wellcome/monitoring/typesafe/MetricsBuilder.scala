@@ -1,6 +1,6 @@
 package uk.ac.wellcome.monitoring.typesafe
 
-import akka.actor.ActorSystem
+import akka.stream.ActorMaterializer
 import com.amazonaws.services.cloudwatch.AmazonCloudWatch
 import com.typesafe.config.Config
 import uk.ac.wellcome.monitoring.{MetricsConfig, MetricsSender}
@@ -26,7 +26,7 @@ object MetricsBuilder {
     cloudWatchClient: AmazonCloudWatch,
     metricsConfig: MetricsConfig
   )(implicit
-    actorSystem: ActorSystem,
+    materializer: ActorMaterializer,
     ec: ExecutionContext): MetricsSender =
     new MetricsSender(
       cloudWatchClient = cloudWatchClient,
@@ -35,7 +35,7 @@ object MetricsBuilder {
 
   def buildMetricsSender(config: Config)(
     implicit
-    actorSystem: ActorSystem,
+    materializer: ActorMaterializer,
     ec: ExecutionContext): MetricsSender =
     buildMetricsSender(
       cloudWatchClient = CloudWatchBuilder.buildCloudWatchClient(config),
