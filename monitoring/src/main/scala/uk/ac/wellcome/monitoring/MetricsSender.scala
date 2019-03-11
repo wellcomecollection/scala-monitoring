@@ -7,7 +7,6 @@ import akka.stream.scaladsl.{Flow, Keep, Sink, Source, SourceQueueWithComplete}
 import akka.stream.{
   ActorMaterializer,
   OverflowStrategy,
-  QueueOfferResult,
   ThrottleMode
 }
 import com.amazonaws.services.cloudwatch.AmazonCloudWatch
@@ -60,18 +59,13 @@ class MetricsSender(
       .to(sink)
       .run()
 
-  def incrementCount(metricName: String): Future[QueueOfferResult] = {
+  def incrementCount(metricName: String): Future[Unit] = {
     val metricDatum = new MetricDatum()
       .withMetricName(metricName)
       .withValue(1.0)
       .withUnit(StandardUnit.Count)
       .withTimestamp(new Date())
 
-    sendToStream(metricDatum)
+    sourceQueue.offer(metricDatum).map { _ => () }
   }
-
-  private def sendToStream(
-    metricDatum: MetricDatum
-  ): Future[QueueOfferResult] =
-    sourceQueue.offer(metricDatum)
 }

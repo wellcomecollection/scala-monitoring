@@ -78,7 +78,7 @@ class MetricsSenderTest
       // Each PutMetricRequest is made of 20 MetricDatum so we need
       // 20 * 150 = 3000 calls to incrementCount to get 150 PutMetricData calls
       val futures =
-      (1 to 3000).map { i => metricsSender.incrementCount(s"${i}_$metricName") }
+        (1 to 3000).map { i => metricsSender.incrementCount(s"${i}_$metricName") }
 
       val promisedInstant = Promise[Instant]
 
