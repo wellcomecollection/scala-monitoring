@@ -105,20 +105,6 @@ class MetricsSenderTest
   private def createMetricName: String =
     (Random.alphanumeric take 10 mkString) toLowerCase
 
-  private def assertSendsSingleDataPoint[T](
-    metricName: String,
-    expectedMetricName: String,
-    f: MetricsSender => Future[T]
-  ): Assertion = {
-    val amazonCloudWatch = mock[AmazonCloudWatch]
-    withMetricsSender(amazonCloudWatch) { metricsSender =>
-      whenReady(f(metricsSender)) { _ =>
-        assertSingleDataPoint(
-          amazonCloudWatch, metricName = expectedMetricName)
-      }
-    }
-  }
-
   private def assertSingleDataPoint(amazonCloudWatch: AmazonCloudWatch, metricName: String) = {
     val capture = ArgumentCaptor.forClass(classOf[PutMetricDataRequest])
     eventually {
