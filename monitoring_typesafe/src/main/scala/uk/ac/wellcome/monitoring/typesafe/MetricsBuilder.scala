@@ -1,14 +1,15 @@
 package uk.ac.wellcome.monitoring.typesafe
 
-import akka.actor.ActorSystem
+import akka.stream.ActorMaterializer
 import com.amazonaws.services.cloudwatch.AmazonCloudWatch
 import com.typesafe.config.Config
 import uk.ac.wellcome.monitoring.{MetricsConfig, MetricsSender}
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 
+import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
-object MetricsSenderBuilder {
+object MetricsBuilder {
   def buildMetricsConfig(config: Config): MetricsConfig = {
     val namespace =
       config.getOrElse[String]("aws.metrics.namespace")(default = "")
@@ -24,15 +25,17 @@ object MetricsSenderBuilder {
   private def buildMetricsSender(
     cloudWatchClient: AmazonCloudWatch,
     metricsConfig: MetricsConfig
-  )(implicit actorSystem: ActorSystem): MetricsSender =
+  )(implicit
+    materializer: ActorMaterializer,
+    ec: ExecutionContext): MetricsSender =
     new MetricsSender(
-      amazonCloudWatch = cloudWatchClient,
-      actorSystem = actorSystem,
+      cloudWatchClient = cloudWatchClient,
       metricsConfig = metricsConfig
     )
 
-  def buildMetricsSender(config: Config)(
-    implicit actorSystem: ActorSystem): MetricsSender =
+  def buildMetricsSender(config: Config)(implicit
+                                         materializer: ActorMaterializer,
+                                         ec: ExecutionContext): MetricsSender =
     buildMetricsSender(
       cloudWatchClient = CloudWatchBuilder.buildCloudWatchClient(config),
       metricsConfig = buildMetricsConfig(config)

@@ -1,76 +1,48 @@
 package uk.ac.wellcome.monitoring.fixtures
 
-import akka.actor.ActorSystem
-import akka.stream.QueueOfferResult
 import com.amazonaws.services.cloudwatch.AmazonCloudWatch
-import grizzled.slf4j.Logging
-import org.mockito.Matchers.{any, anyString, endsWith}
-import org.mockito.Mockito.{never, times, verify, when}
+import org.mockito.Matchers.anyString
+import org.mockito.Mockito.when
 import org.mockito.invocation.InvocationOnMock
-import org.mockito.stubbing.Answer
 import org.scalatest.mockito.MockitoSugar
+import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures._
 import uk.ac.wellcome.monitoring.{MetricsConfig, MetricsSender}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 trait MetricsSenderFixture
-    extends Logging
-    with MockitoSugar
-    with CloudWatch
-    with Akka {
-
-  val QUEUE_RETRIES = 3
+    extends CloudWatch
+    with Akka
+    with MockitoSugar {
 
   def withMetricsSender[R](
-    actorSystem: ActorSystem,
-    amazonCloudWatch: AmazonCloudWatch = cloudWatchClient): Fixture[MetricsSender, R] =
-    fixture[MetricsSender, R](
-      create = {
+    cloudWatchClient: AmazonCloudWatch = cloudWatchClient)(
+    testWith: TestWith[MetricsSender, R]): R =
+    withActorSystem { actorSystem =>
+      withMaterializer(actorSystem) { implicit materializer =>
         val metricsSender = new MetricsSender(
-          amazonCloudWatch = amazonCloudWatch,
-          actorSystem = actorSystem,
+          cloudWatchClient = cloudWatchClient,
           metricsConfig = MetricsConfig(
             namespace = awsNamespace,
             flushInterval = flushInterval
           )
         )
-        metricsSender
+
+        testWith(metricsSender)
       }
-    )
+    }
 
-  def withMockMetricSender[R]: Fixture[MetricsSender, R] =
-    fixture[MetricsSender, R](
-      create = {
-        val metricsSender = mock[MetricsSender]
-        when(
-          metricsSender.count(
-            anyString(),
-            any[Future[Unit]]()
-          )(any[ExecutionContext])
-        ).thenAnswer(new Answer[Future[Unit]] {
-          override def answer(invocation: InvocationOnMock): Future[Unit] = {
-            invocation.callRealMethod().asInstanceOf[Future[Unit]]
-          }
-        })
-        metricsSender
-      }
-    )
+  def withMockMetricsSender[R](testWith: TestWith[MetricsSender, R]): R = {
+    val metricsSender = mock[MetricsSender]
 
-  def assertSuccessMetricIncremented(mockMetricsSender: MetricsSender): Future[QueueOfferResult] =
-    verify(mockMetricsSender, times(1))
-      .incrementCount(endsWith("_ProcessMessage_success"))
+    when(
+      metricsSender.incrementCount(anyString())
+    ).thenAnswer((invocation: InvocationOnMock) => {
+      Future.successful(())
+    })
 
-  def assertFailureMetricIncremented(mockMetricsSender: MetricsSender): Future[QueueOfferResult] =
-    verify(mockMetricsSender, times(QUEUE_RETRIES))
-      .incrementCount(endsWith("_ProcessMessage_failure"))
-
-  def assertFailureMetricNotIncremented(mockMetricsSender: MetricsSender): Future[QueueOfferResult] =
-    verify(mockMetricsSender, never())
-      .incrementCount(endsWith("_ProcessMessage_failure"))
-
-  def assertRecognisedFailureMetricIncremented(
-    mockMetricsSender: MetricsSender): Future[QueueOfferResult] =
-    verify(mockMetricsSender, times(QUEUE_RETRIES))
-      .incrementCount(endsWith("_recognisedFailure"))
+    testWith(metricsSender)
+  }
 }
