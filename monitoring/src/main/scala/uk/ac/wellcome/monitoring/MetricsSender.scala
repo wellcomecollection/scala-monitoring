@@ -39,7 +39,10 @@ class MetricsSender(
 
   val source: Source[MetricDatum, SourceQueueWithComplete[MetricDatum]] =
     Source
-      .queue[MetricDatum](5000, OverflowStrategy.backpressure)
+      .queue[MetricDatum](
+        bufferSize = 5000,
+        overflowStrategy = OverflowStrategy.backpressure
+      )
 
   val materializer = Flow[MetricDatum]
     .groupedWithin(metricDataListMaxSize, metricsConfig.flushInterval)
@@ -49,10 +52,11 @@ class MetricsSender(
       .viaMat(materializer)(Keep.left)
       // Make sure we don't exceed aws rate limit
       .throttle(
-        maxPutMetricDataRequestsPerSecond,
-        1 second,
-        0,
-        ThrottleMode.shaping)
+        elements = maxPutMetricDataRequestsPerSecond,
+        per = 1 second,
+        maximumBurst = 0,
+        mode = ThrottleMode.shaping
+      )
       .to(sink)
       .run()
 
