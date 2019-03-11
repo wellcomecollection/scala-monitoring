@@ -3,7 +3,6 @@ package uk.ac.wellcome.monitoring
 import java.util.Date
 
 import akka.Done
-import akka.actor.ActorSystem
 import akka.stream.scaladsl.{Flow, Keep, Sink, Source, SourceQueueWithComplete}
 import akka.stream.{
   ActorMaterializer,
@@ -18,13 +17,11 @@ import grizzled.slf4j.Logging
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
-class MetricsSender(amazonCloudWatch: AmazonCloudWatch,
-                    actorSystem: ActorSystem,
-                    metricsConfig: MetricsConfig)
+class MetricsSender(
+  cloudWatchClient: AmazonCloudWatch,
+  metricsConfig: MetricsConfig)(
+  implicit actorMaterializer: ActorMaterializer)
     extends Logging {
-
-  implicit val system = actorSystem
-  implicit val materialiser = ActorMaterializer()
 
   // According to https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_limits.html
   // PutMetricData supports a maximum of 20 MetricDatum per PutMetricDataRequest.
@@ -34,7 +31,7 @@ class MetricsSender(amazonCloudWatch: AmazonCloudWatch,
 
   val sink: Sink[Seq[MetricDatum], Future[Done]] = Sink.foreach(
     metricDataSeq =>
-      amazonCloudWatch.putMetricData(
+      cloudWatchClient.putMetricData(
         new PutMetricDataRequest()
           .withNamespace(metricsConfig.namespace)
           .withMetricData(metricDataSeq: _*)

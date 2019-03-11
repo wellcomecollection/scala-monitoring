@@ -26,7 +26,7 @@ object MetricsSenderBuilder {
     metricsConfig: MetricsConfig
   )(implicit actorSystem: ActorSystem): MetricsSender =
     new MetricsSender(
-      amazonCloudWatch = cloudWatchClient,
+      cloudWatchClient = cloudWatchClient,
       actorSystem = actorSystem,
       metricsConfig = metricsConfig
     )
