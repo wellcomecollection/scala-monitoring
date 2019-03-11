@@ -4,11 +4,7 @@ import java.util.Date
 
 import akka.Done
 import akka.stream.scaladsl.{Flow, Keep, Sink, Source, SourceQueueWithComplete}
-import akka.stream.{
-  ActorMaterializer,
-  OverflowStrategy,
-  ThrottleMode
-}
+import akka.stream.{ActorMaterializer, OverflowStrategy, ThrottleMode}
 import com.amazonaws.services.cloudwatch.AmazonCloudWatch
 import com.amazonaws.services.cloudwatch.model._
 import grizzled.slf4j.Logging
@@ -16,9 +12,8 @@ import grizzled.slf4j.Logging
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 
-class MetricsSender(
-  cloudWatchClient: AmazonCloudWatch,
-  metricsConfig: MetricsConfig)(
+class MetricsSender(cloudWatchClient: AmazonCloudWatch,
+                    metricsConfig: MetricsConfig)(
   implicit actorMaterializer: ActorMaterializer,
   ec: ExecutionContext)
     extends Logging {
@@ -67,6 +62,8 @@ class MetricsSender(
       .withUnit(StandardUnit.Count)
       .withTimestamp(new Date())
 
-    sourceQueue.offer(metricDatum).map { _ => () }
+    sourceQueue.offer(metricDatum).map { _ =>
+      ()
+    }
   }
 }

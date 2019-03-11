@@ -33,10 +33,9 @@ object MetricsBuilder {
       metricsConfig = metricsConfig
     )
 
-  def buildMetricsSender(config: Config)(
-    implicit
-    materializer: ActorMaterializer,
-    ec: ExecutionContext): MetricsSender =
+  def buildMetricsSender(config: Config)(implicit
+                                         materializer: ActorMaterializer,
+                                         ec: ExecutionContext): MetricsSender =
     buildMetricsSender(
       cloudWatchClient = CloudWatchBuilder.buildCloudWatchClient(config),
       metricsConfig = buildMetricsConfig(config)
