@@ -15,9 +15,8 @@ import com.amazonaws.services.cloudwatch.AmazonCloudWatch
 import com.amazonaws.services.cloudwatch.model._
 import grizzled.slf4j.Logging
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 import scala.concurrent.duration._
-import scala.util.{Failure, Success}
 
 class MetricsSender(amazonCloudWatch: AmazonCloudWatch,
                     actorSystem: ActorSystem,
@@ -59,21 +58,6 @@ class MetricsSender(amazonCloudWatch: AmazonCloudWatch,
         ThrottleMode.shaping)
       .to(sink)
       .run()
-
-  @deprecated(
-    "Use one of the specific count{Success,RecognisedFailure,Failure} methods",
-    "messaging 1.1")
-  def count[T](metricName: String, f: Future[T])(
-    implicit ec: ExecutionContext): Future[T] = {
-    f.onComplete {
-      case Success(_) => countSuccess(metricName)
-      case Failure(_: RecognisedFailureException) =>
-        countRecognisedFailure(metricName)
-      case Failure(_) => countFailure(metricName)
-    }
-
-    f
-  }
 
   def countSuccess(metricName: String): Future[QueueOfferResult] =
     incrementCount(s"${metricName}_success")
