@@ -4,6 +4,7 @@ import akka.actor.ActorSystem
 import com.amazonaws.services.cloudwatch.AmazonCloudWatch
 import grizzled.slf4j.Logging
 import org.scalatest.mockito.MockitoSugar
+import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures._
 import uk.ac.wellcome.monitoring.{MetricsConfig, MetricsSender}
 

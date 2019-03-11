@@ -52,7 +52,6 @@ object Dependencies {
     loggingDependencies ++
     testDependencies ++
     akkaDependencies ++
-    WellcomeDependencies.fixturesLibrary
-
-  val typesafeDependencies = WellcomeDependencies.typesafeLibrary
+    WellcomeDependencies.fixturesLibrary ++
+    WellcomeDependencies.typesafeLibrary
 }

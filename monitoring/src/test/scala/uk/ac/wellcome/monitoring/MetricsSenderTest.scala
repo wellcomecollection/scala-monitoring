@@ -13,7 +13,7 @@ import org.scalatest.concurrent.{
 }
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FunSpec, Matchers}
-import uk.ac.wellcome.monitoring.fixtures.{Akka, MetricsSenderFixture}
+import uk.ac.wellcome.monitoring.fixtures.MetricsSenderFixture
 
 import scala.collection.JavaConverters._
 import scala.concurrent.duration._
@@ -27,14 +27,13 @@ class MetricsSenderTest
     with Matchers
     with ScalaFutures
     with Eventually
-    with Akka
     with IntegrationPatience
     with MetricsSenderFixture {
 
   import org.mockito.Mockito._
 
   it("counts a metric") {
-    withMonitoringActorSystem { actorSystem =>
+    withActorSystem { actorSystem =>
       val amazonCloudWatch = mock[AmazonCloudWatch]
       withMetricsSender(actorSystem, amazonCloudWatch) { metricsSender =>
         val metricName = createMetricName
@@ -49,7 +48,7 @@ class MetricsSenderTest
   }
 
   it("groups 20 MetricDatum into one PutMetricDataRequest") {
-    withMonitoringActorSystem { actorSystem =>
+    withActorSystem { actorSystem =>
       val amazonCloudWatch = mock[AmazonCloudWatch]
       withMetricsSender(actorSystem, amazonCloudWatch) { metricsSender =>
         val capture = ArgumentCaptor.forClass(classOf[PutMetricDataRequest])
@@ -75,7 +74,7 @@ class MetricsSenderTest
   }
 
   it("takes at least one second to make 150 PutMetricData requests") {
-    withMonitoringActorSystem { actorSystem =>
+    withActorSystem { actorSystem =>
       val amazonCloudWatch = mock[AmazonCloudWatch]
       withMetricsSender(actorSystem, amazonCloudWatch) { metricsSender =>
         val capture = ArgumentCaptor.forClass(classOf[PutMetricDataRequest])
@@ -121,7 +120,7 @@ class MetricsSenderTest
     expectedMetricName: String,
     f: (MetricsSender) => Future[T]
   ) = {
-    withMonitoringActorSystem { actorSystem =>
+    withActorSystem { actorSystem =>
       val amazonCloudWatch = mock[AmazonCloudWatch]
       withMetricsSender(actorSystem, amazonCloudWatch) { metricsSender =>
         whenReady(f(metricsSender)) { _ =>
