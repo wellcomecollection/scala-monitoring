@@ -33,6 +33,21 @@ class MetricsSenderTest
 
   import org.mockito.Mockito._
 
+  it("counts a metric") {
+    withMonitoringActorSystem { actorSystem =>
+      val amazonCloudWatch = mock[AmazonCloudWatch]
+      withMetricsSender(actorSystem, amazonCloudWatch) { metricsSender =>
+        val metricName = createMetricName
+
+        val future = metricsSender.incrementCount(metricName)
+
+        whenReady(future) { _ =>
+          assertSingleDataPoint(amazonCloudWatch, metricName)
+        }
+      }
+    }
+  }
+
   describe("count") {
     it("counts a successful future") {
       withMonitoringActorSystem { actorSystem =>
