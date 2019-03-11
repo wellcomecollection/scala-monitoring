@@ -12,12 +12,12 @@ trait MetricsSenderFixture
     with Akka {
 
   def withMetricsSender[R](
-    amazonCloudWatch: AmazonCloudWatch = cloudWatchClient)(
+    cloudWatchClient: AmazonCloudWatch = cloudWatchClient)(
     testWith: TestWith[MetricsSender, R]): R =
     withActorSystem { actorSystem =>
       withMaterializer(actorSystem) { implicit materializer =>
         val metricsSender = new MetricsSender(
-          cloudWatchClient = amazonCloudWatch,
+          cloudWatchClient = cloudWatchClient,
           metricsConfig = MetricsConfig(
             namespace = awsNamespace,
             flushInterval = flushInterval
