@@ -13,13 +13,14 @@ import com.amazonaws.services.cloudwatch.AmazonCloudWatch
 import com.amazonaws.services.cloudwatch.model._
 import grizzled.slf4j.Logging
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 
 class MetricsSender(
   cloudWatchClient: AmazonCloudWatch,
   metricsConfig: MetricsConfig)(
-  implicit actorMaterializer: ActorMaterializer)
+  implicit actorMaterializer: ActorMaterializer,
+  ec: ExecutionContext)
     extends Logging {
 
   // According to https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_limits.html

@@ -6,6 +6,7 @@ import com.typesafe.config.Config
 import uk.ac.wellcome.monitoring.{MetricsConfig, MetricsSender}
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 
+import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
 object MetricsBuilder {
@@ -24,14 +25,18 @@ object MetricsBuilder {
   private def buildMetricsSender(
     cloudWatchClient: AmazonCloudWatch,
     metricsConfig: MetricsConfig
-  )(implicit actorSystem: ActorSystem): MetricsSender =
+  )(implicit
+    actorSystem: ActorSystem,
+    ec: ExecutionContext): MetricsSender =
     new MetricsSender(
       cloudWatchClient = cloudWatchClient,
       metricsConfig = metricsConfig
     )
 
   def buildMetricsSender(config: Config)(
-    implicit actorSystem: ActorSystem): MetricsSender =
+    implicit
+    actorSystem: ActorSystem,
+    ec: ExecutionContext): MetricsSender =
     buildMetricsSender(
       cloudWatchClient = CloudWatchBuilder.buildCloudWatchClient(config),
       metricsConfig = buildMetricsConfig(config)

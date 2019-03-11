@@ -5,6 +5,8 @@ import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures._
 import uk.ac.wellcome.monitoring.{MetricsConfig, MetricsSender}
 
+import scala.concurrent.ExecutionContext.Implicits.global
+
 trait MetricsSenderFixture
     extends CloudWatch
     with Akka {
