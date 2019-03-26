@@ -40,8 +40,9 @@ class MetricsSender(cloudWatchClient: AmazonCloudWatch,
         overflowStrategy = OverflowStrategy.backpressure
       )
 
-  val materializer: Flow[MetricDatum, immutable.Seq[MetricDatum], NotUsed] = Flow[MetricDatum]
-    .groupedWithin(metricDataListMaxSize, metricsConfig.flushInterval)
+  val materializer: Flow[MetricDatum, immutable.Seq[MetricDatum], NotUsed] =
+    Flow[MetricDatum]
+      .groupedWithin(metricDataListMaxSize, metricsConfig.flushInterval)
 
   val sourceQueue: SourceQueueWithComplete[MetricDatum] =
     source
@@ -68,7 +69,9 @@ class MetricsSender(cloudWatchClient: AmazonCloudWatch,
     }
   }
 
-  def recordValue(metricName: String, value: Double, maybeUnit: Option[StandardUnit] = None): Future[Unit] = {
+  def recordValue(metricName: String,
+                  value: Double,
+                  maybeUnit: Option[StandardUnit] = None): Future[Unit] = {
     val metricDatum = new MetricDatum()
       .withMetricName(metricName)
       .withValue(value)
