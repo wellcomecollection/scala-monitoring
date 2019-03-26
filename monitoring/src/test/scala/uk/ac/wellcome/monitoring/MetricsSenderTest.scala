@@ -4,7 +4,7 @@ import java.time.Instant
 import java.time.temporal.ChronoUnit
 
 import com.amazonaws.services.cloudwatch.AmazonCloudWatch
-import com.amazonaws.services.cloudwatch.model.PutMetricDataRequest
+import com.amazonaws.services.cloudwatch.model.{PutMetricDataRequest, StandardUnit}
 import org.mockito.ArgumentCaptor
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
 import org.scalatest.mockito.MockitoSugar
@@ -37,6 +37,19 @@ class MetricsSenderTest
 
       whenReady(future) { _ =>
         assertSingleDataPoint(amazonCloudWatch, metricName)
+      }
+    }
+  }
+
+  it("records a value metric") {
+    val amazonCloudWatch = mock[AmazonCloudWatch]
+    withMetricsSender(amazonCloudWatch) { metricsSender =>
+      val metricName = createMetricName
+
+      val future = metricsSender.recordValue(metricName, 10.0, Some(StandardUnit.Seconds))
+
+      whenReady(future) { _ =>
+        assertSingleDataPoint(amazonCloudWatch, metricName, 10.0, "Seconds")
       }
     }
   }
@@ -105,7 +118,10 @@ class MetricsSenderTest
   private def createMetricName: String =
     (Random.alphanumeric take 10 mkString) toLowerCase
 
-  private def assertSingleDataPoint(amazonCloudWatch: AmazonCloudWatch, metricName: String): Assertion = {
+  private def assertSingleDataPoint(amazonCloudWatch: AmazonCloudWatch,
+                                    metricName: String,
+                                    expectedValue: Double = 1.0,
+                                    expectedUnit: String = "Count"): Assertion = {
     val capture = ArgumentCaptor.forClass(classOf[PutMetricDataRequest])
     eventually {
       verify(amazonCloudWatch, times(1)).putMetricData(capture.capture())
@@ -114,7 +130,10 @@ class MetricsSenderTest
       val metricData = putMetricDataRequest.getMetricData
       metricData should have size 1
       metricData.asScala.exists { metricDatum =>
-        (metricDatum.getValue == 1.0) && metricDatum.getMetricName == metricName
+        metricDatum.getValue == expectedValue &&
+          metricDatum.getMetricName == metricName &&
+        metricDatum.getUnit == expectedUnit
+
       } shouldBe true
     }
   }
