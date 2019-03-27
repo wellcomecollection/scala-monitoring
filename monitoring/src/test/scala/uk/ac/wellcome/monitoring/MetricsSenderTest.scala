@@ -36,7 +36,7 @@ class MetricsSenderTest
       val future = metricsSender.incrementCount(metricName)
 
       whenReady(future) { _ =>
-        assertSingleDataPoint(amazonCloudWatch, metricName)
+        assertSingleDataPoint(amazonCloudWatch, metricName, maybeExpectedUnit = Some("Count"))
       }
     }
   }
@@ -46,10 +46,23 @@ class MetricsSenderTest
     withMetricsSender(amazonCloudWatch) { metricsSender =>
       val metricName = createMetricName
 
-      val future = metricsSender.recordValue(metricName, 10.0, Some(StandardUnit.Seconds))
+      val future = metricsSender.recordValue(metricName, 10.0)
 
       whenReady(future) { _ =>
-        assertSingleDataPoint(amazonCloudWatch, metricName, 10.0, "Seconds")
+        assertSingleDataPoint(amazonCloudWatch, metricName, 10.0)
+      }
+    }
+  }
+
+  it("records a value metric with a unit") {
+    val amazonCloudWatch = mock[AmazonCloudWatch]
+    withMetricsSender(amazonCloudWatch) { metricsSender =>
+      val metricName = createMetricName
+
+      val future = metricsSender.recordValue(metricName, 11.0, Some(StandardUnit.Seconds))
+
+      whenReady(future) { _ =>
+        assertSingleDataPoint(amazonCloudWatch, metricName, 11.0, Some("Seconds"))
       }
     }
   }
@@ -121,7 +134,7 @@ class MetricsSenderTest
   private def assertSingleDataPoint(amazonCloudWatch: AmazonCloudWatch,
                                     metricName: String,
                                     expectedValue: Double = 1.0,
-                                    expectedUnit: String = "Count"): Assertion = {
+                                    maybeExpectedUnit: Option[String] = None): Assertion = {
     val capture = ArgumentCaptor.forClass(classOf[PutMetricDataRequest])
     eventually {
       verify(amazonCloudWatch, times(1)).putMetricData(capture.capture())
@@ -129,12 +142,12 @@ class MetricsSenderTest
       val putMetricDataRequest = capture.getValue
       val metricData = putMetricDataRequest.getMetricData
       metricData should have size 1
-      metricData.asScala.exists { metricDatum =>
-        metricDatum.getValue == expectedValue &&
-          metricDatum.getMetricName == metricName &&
-        metricDatum.getUnit == expectedUnit
-
-      } shouldBe true
+      val metricDatum = metricData.asScala.head
+      metricDatum.getValue shouldBe expectedValue
+      maybeExpectedUnit.foreach { expectedUnit =>
+        metricDatum.getUnit shouldBe expectedUnit
+      }
+      metricDatum.getMetricName shouldBe metricName
     }
   }
 }
