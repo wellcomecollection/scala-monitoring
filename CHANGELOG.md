@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v2.1.0 - 2019-03-27
+
+adds an additional method 'recordValue' to MetricsSender that sends values to Cloudwatch.
+
 ## v2.0.0 - 2019-03-11
 
 This release cleans up MetricsSender, strips out some deprecated methods and generally tidies up the library.
