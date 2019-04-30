@@ -17,7 +17,8 @@ class MetricsSender(cloudWatchClient: AmazonCloudWatch,
                     metricsConfig: MetricsConfig)(
   implicit actorMaterializer: ActorMaterializer,
   ec: ExecutionContext)
-    extends Logging {
+    extends Metrics[Future, StandardUnit]
+    with Logging {
 
   // According to https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_limits.html
   // PutMetricData supports a maximum of 20 MetricDatum per PutMetricDataRequest.
@@ -57,7 +58,7 @@ class MetricsSender(cloudWatchClient: AmazonCloudWatch,
       .to(sink)
       .run()
 
-  def incrementCount(metricName: String): Future[Unit] = {
+  override def incrementCount(metricName: String): Future[Unit] = {
     val metricDatum = new MetricDatum()
       .withMetricName(metricName)
       .withValue(1.0)
@@ -69,9 +70,9 @@ class MetricsSender(cloudWatchClient: AmazonCloudWatch,
     }
   }
 
-  def recordValue(metricName: String,
-                  value: Double,
-                  maybeUnit: Option[StandardUnit] = None): Future[Unit] = {
+  override def recordValue(metricName: String,
+                           value: Double,
+                           maybeUnit: Option[StandardUnit]): Future[Unit] = {
     val metricDatum = new MetricDatum()
       .withMetricName(metricName)
       .withValue(value)
