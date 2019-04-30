@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v2.2.0 - 2019-04-30
+
+Adds a `Metrics` trait, so that we can substitute this interface elsewhere
+
 ## v2.1.0 - 2019-03-27
 
 adds an additional method 'recordValue' to MetricsSender that sends values to Cloudwatch.
