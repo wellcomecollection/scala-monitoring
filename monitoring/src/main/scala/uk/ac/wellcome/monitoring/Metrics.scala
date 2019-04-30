@@ -10,4 +10,3 @@ trait Metrics[F[_], MetricUnit] {
     maybeUnit: Option[MetricUnit] = None
   ): F[Unit]
 }
-
