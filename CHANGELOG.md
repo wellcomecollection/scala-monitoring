@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v2.3.0 - 2019-06-03
+
+Add a `MemoryMetrics` instance for using in tests.
+
 ## v2.2.0 - 2019-04-30
 
 Adds a `Metrics` trait, so that we can substitute this interface elsewhere
