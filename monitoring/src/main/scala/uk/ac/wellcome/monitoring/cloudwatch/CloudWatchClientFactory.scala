@@ -1,7 +1,10 @@
 package uk.ac.wellcome.monitoring.cloudwatch
 
 import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration
-import com.amazonaws.services.cloudwatch.{AmazonCloudWatch, AmazonCloudWatchClientBuilder}
+import com.amazonaws.services.cloudwatch.{
+  AmazonCloudWatch,
+  AmazonCloudWatchClientBuilder
+}
 
 object CloudWatchClientFactory {
   def create(region: String, endpoint: String): AmazonCloudWatch = {
