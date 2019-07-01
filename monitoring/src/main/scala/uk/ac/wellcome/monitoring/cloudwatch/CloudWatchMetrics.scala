@@ -1,20 +1,21 @@
-package uk.ac.wellcome.monitoring
+package uk.ac.wellcome.monitoring.cloudwatch
 
 import java.util.Date
 
-import akka.{Done, NotUsed}
 import akka.stream.scaladsl.{Flow, Keep, Sink, Source, SourceQueueWithComplete}
 import akka.stream.{ActorMaterializer, OverflowStrategy, ThrottleMode}
+import akka.{Done, NotUsed}
 import com.amazonaws.services.cloudwatch.AmazonCloudWatch
 import com.amazonaws.services.cloudwatch.model._
 import grizzled.slf4j.Logging
+import uk.ac.wellcome.monitoring.Metrics
 
 import scala.collection.immutable
-import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
+import scala.concurrent.{ExecutionContext, Future}
 
-class MetricsSender(cloudWatchClient: AmazonCloudWatch,
-                    metricsConfig: MetricsConfig)(
+class CloudWatchMetrics(cloudWatchClient: AmazonCloudWatch,
+                        metricsConfig: MetricsConfig)(
   implicit actorMaterializer: ActorMaterializer,
   ec: ExecutionContext)
     extends Metrics[Future, StandardUnit]

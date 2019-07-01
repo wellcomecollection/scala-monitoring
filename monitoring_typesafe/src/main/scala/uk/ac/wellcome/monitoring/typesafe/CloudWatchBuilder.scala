@@ -3,7 +3,7 @@ package uk.ac.wellcome.monitoring.typesafe
 import com.amazonaws.services.cloudwatch.AmazonCloudWatch
 import com.typesafe.config.Config
 import uk.ac.wellcome.config.models.AWSClientConfig
-import uk.ac.wellcome.monitoring.CloudWatchClientFactory
+import uk.ac.wellcome.monitoring.cloudwatch.CloudWatchClientFactory
 import uk.ac.wellcome.typesafe.config.builders.AWSClientConfigBuilder
 
 object CloudWatchBuilder extends AWSClientConfigBuilder {
