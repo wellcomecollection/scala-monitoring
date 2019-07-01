@@ -14,7 +14,7 @@ object WellcomeDependencies {
 object Dependencies {
 
   lazy val versions = new {
-    val aws = "1.11.225"=
+    val aws = "1.11.225"
     val mockito = "1.9.5"
     val scalatest = "3.0.1"
   }
