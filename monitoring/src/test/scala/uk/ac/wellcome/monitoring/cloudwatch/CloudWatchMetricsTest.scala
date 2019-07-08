@@ -11,6 +11,7 @@ import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{Assertion, FunSpec, Matchers}
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
+import uk.ac.wellcome.monitoring.MetricsConfig
 
 import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -133,8 +134,14 @@ class CloudWatchMetricsTest
   private def createMetricName: String =
     (Random.alphanumeric take 10 mkString) toLowerCase
 
+  private val cloudWatchClient: AmazonCloudWatch =
+    CloudWatchClientFactory.create(
+      region = "eu-west-1",
+      endpoint = "http://localhost:4582"
+    )
+
   private def withMetricsSender[R](
-    cloudWatchClient: AmazonCloudWatch)(
+    cloudWatchClient: AmazonCloudWatch = cloudWatchClient)(
     testWith: TestWith[CloudWatchMetrics, R]): R =
     withActorSystem { actorSystem =>
       withMaterializer(actorSystem) { implicit materializer =>

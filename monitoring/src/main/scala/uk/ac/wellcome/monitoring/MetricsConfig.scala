@@ -1,4 +1,4 @@
-package uk.ac.wellcome.monitoring.cloudwatch
+package uk.ac.wellcome.monitoring
 
 import scala.concurrent.duration.FiniteDuration
 

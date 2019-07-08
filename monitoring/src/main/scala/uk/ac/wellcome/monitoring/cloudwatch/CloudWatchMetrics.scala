@@ -8,7 +8,7 @@ import akka.{Done, NotUsed}
 import com.amazonaws.services.cloudwatch.AmazonCloudWatch
 import com.amazonaws.services.cloudwatch.model._
 import grizzled.slf4j.Logging
-import uk.ac.wellcome.monitoring.Metrics
+import uk.ac.wellcome.monitoring.{Metrics, MetricsConfig}
 
 import scala.collection.immutable
 import scala.concurrent.duration._
