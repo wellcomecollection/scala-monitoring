@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v2.4.0 - 2019-07-08
+
+Bump the versions of underlying libraries, plus tidy up the code to follow our new patterns.
+
 ## v2.3.0 - 2019-06-03
 
 Add a `MemoryMetrics` instance for using in tests.
