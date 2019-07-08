@@ -1,12 +1,9 @@
 package uk.ac.wellcome.monitoring.typesafe
 
-import akka.stream.ActorMaterializer
-import com.amazonaws.services.cloudwatch.AmazonCloudWatch
 import com.typesafe.config.Config
-import uk.ac.wellcome.monitoring.{MetricsConfig, MetricsSender}
+import uk.ac.wellcome.monitoring.MetricsConfig
 import uk.ac.wellcome.typesafe.config.builders.EnrichConfig._
 
-import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
 object MetricsBuilder {
@@ -21,23 +18,4 @@ object MetricsBuilder {
       flushInterval = flushInterval
     )
   }
-
-  private def buildMetricsSender(
-    cloudWatchClient: AmazonCloudWatch,
-    metricsConfig: MetricsConfig
-  )(implicit
-    materializer: ActorMaterializer,
-    ec: ExecutionContext): MetricsSender =
-    new MetricsSender(
-      cloudWatchClient = cloudWatchClient,
-      metricsConfig = metricsConfig
-    )
-
-  def buildMetricsSender(config: Config)(implicit
-                                         materializer: ActorMaterializer,
-                                         ec: ExecutionContext): MetricsSender =
-    buildMetricsSender(
-      cloudWatchClient = CloudWatchBuilder.buildCloudWatchClient(config),
-      metricsConfig = buildMetricsConfig(config)
-    )
 }

@@ -1,4 +1,4 @@
-package uk.ac.wellcome.monitoring
+package uk.ac.wellcome.monitoring.cloudwatch
 
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -9,22 +9,24 @@ import org.mockito.ArgumentCaptor
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{Assertion, FunSpec, Matchers}
-import uk.ac.wellcome.monitoring.fixtures.MetricsSenderFixture
+import uk.ac.wellcome.akka.fixtures.Akka
+import uk.ac.wellcome.fixtures.TestWith
+import uk.ac.wellcome.monitoring.MetricsConfig
 
 import scala.collection.JavaConverters._
-import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
 import scala.concurrent.{Future, Promise}
 import scala.util.Random
 
-class MetricsSenderTest
+class CloudWatchMetricsTest
     extends FunSpec
     with MockitoSugar
     with Matchers
     with ScalaFutures
     with Eventually
-    with IntegrationPatience
-    with MetricsSenderFixture {
+    with Akka
+    with IntegrationPatience {
 
   import org.mockito.Mockito._
 
@@ -128,8 +130,32 @@ class MetricsSenderTest
     }
   }
 
+  // TODO: This should use RandomGenerators
   private def createMetricName: String =
     (Random.alphanumeric take 10 mkString) toLowerCase
+
+  private val cloudWatchClient: AmazonCloudWatch =
+    CloudWatchClientFactory.create(
+      region = "eu-west-1",
+      endpoint = "http://localhost:4582"
+    )
+
+  private def withMetricsSender[R](
+    cloudWatchClient: AmazonCloudWatch = cloudWatchClient)(
+    testWith: TestWith[CloudWatchMetrics, R]): R =
+    withActorSystem { actorSystem =>
+      withMaterializer(actorSystem) { implicit materializer =>
+        val metricsSender = new CloudWatchMetrics(
+          cloudWatchClient = cloudWatchClient,
+          metricsConfig = MetricsConfig(
+            namespace = "test",
+            flushInterval = 1 second
+          )
+        )
+
+        testWith(metricsSender)
+      }
+    }
 
   private def assertSingleDataPoint(amazonCloudWatch: AmazonCloudWatch,
                                     metricName: String,
