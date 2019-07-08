@@ -133,14 +133,8 @@ class CloudWatchMetricsTest
   private def createMetricName: String =
     (Random.alphanumeric take 10 mkString) toLowerCase
 
-  private val cloudWatchClient: AmazonCloudWatch =
-    CloudWatchClientFactory.create(
-      region = "eu-west-1",
-      endpoint = "http://localhost:4582"
-    )
-
   private def withMetricsSender[R](
-    cloudWatchClient: AmazonCloudWatch = cloudWatchClient)(
+    cloudWatchClient: AmazonCloudWatch)(
     testWith: TestWith[CloudWatchMetrics, R]): R =
     withActorSystem { actorSystem =>
       withMaterializer(actorSystem) { implicit materializer =>

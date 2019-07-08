@@ -2,8 +2,14 @@ import sbt._
 
 object WellcomeDependencies {
   private lazy val versions = new {
+    val fixtures = "1.2.0"
     val typesafe = "1.1.0"
   }
+
+  val fixturesLibrary: Seq[ModuleID] = Seq[ModuleID](
+    "uk.ac.wellcome" % "fixtures_2.12" % versions.fixtures,
+    "uk.ac.wellcome" % "fixtures_2.12" % versions.fixtures % "test" classifier "tests",
+  )
 
   val typesafeLibrary: Seq[ModuleID] = Seq[ModuleID](
     "uk.ac.wellcome" % "typesafe-app_2.12" % versions.typesafe,
@@ -12,7 +18,6 @@ object WellcomeDependencies {
 }
 
 object Dependencies {
-
   lazy val versions = new {
     val aws = "1.11.225"
     val mockito = "1.9.5"
@@ -28,5 +33,6 @@ object Dependencies {
     "com.amazonaws" % "aws-java-sdk-cloudwatch" % versions.aws
   ) ++
     testDependencies ++
+    WellcomeDependencies.fixturesLibrary ++
     WellcomeDependencies.typesafeLibrary
 }
