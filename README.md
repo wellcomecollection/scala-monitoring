@@ -1,6 +1,6 @@
 # scala-monitoring
 
-[![Build Status](https://travis-ci.org/wellcometrust/scala-monitoring.svg?branch=master)](https://travis-ci.org/wellcometrust/scala-monitoring)
+[![Build Status](https://travis-ci.org/wellcomecollection/scala-monitoring.svg?branch=master)](https://travis-ci.org/wellcomecollection/scala-monitoring)
 
 Monitoring libraries in use at Wellcome:
 
@@ -8,7 +8,7 @@ Monitoring libraries in use at Wellcome:
 
 This library is used as part of the [Wellcome Digital Platform][platform].
 
-[platform]: https://github.com/wellcometrust/platform
+[platform]: https://github.com/wellcomecollection/platform
 
 ## Installation
 
