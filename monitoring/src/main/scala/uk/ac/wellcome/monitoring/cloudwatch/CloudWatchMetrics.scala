@@ -16,8 +16,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class CloudWatchMetrics(cloudWatchClient: AmazonCloudWatch,
                         metricsConfig: MetricsConfig)(
-                         implicit mat: Materializer,
-                         ec: ExecutionContext)
+  implicit mat: Materializer,
+  ec: ExecutionContext)
     extends Metrics[Future, StandardUnit]
     with Logging {
 
