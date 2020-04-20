@@ -3,7 +3,7 @@ package uk.ac.wellcome.monitoring.cloudwatch
 import java.util.Date
 
 import akka.stream.scaladsl.{Flow, Keep, Sink, Source, SourceQueueWithComplete}
-import akka.stream.{ActorMaterializer, OverflowStrategy, ThrottleMode}
+import akka.stream.{Materializer, OverflowStrategy, ThrottleMode}
 import akka.{Done, NotUsed}
 import com.amazonaws.services.cloudwatch.AmazonCloudWatch
 import com.amazonaws.services.cloudwatch.model._
@@ -16,8 +16,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class CloudWatchMetrics(cloudWatchClient: AmazonCloudWatch,
                         metricsConfig: MetricsConfig)(
-  implicit actorMaterializer: ActorMaterializer,
-  ec: ExecutionContext)
+                         implicit mat: Materializer,
+                         ec: ExecutionContext)
     extends Metrics[Future, StandardUnit]
     with Logging {
 

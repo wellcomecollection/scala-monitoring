@@ -7,8 +7,10 @@ import com.amazonaws.services.cloudwatch.AmazonCloudWatch
 import com.amazonaws.services.cloudwatch.model.{PutMetricDataRequest, StandardUnit}
 import org.mockito.ArgumentCaptor
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
-import org.scalatest.mockito.MockitoSugar
-import org.scalatest.{Assertion, FunSpec, Matchers}
+import org.scalatest.Assertion
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
+import org.scalatestplus.mockito.MockitoSugar
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.monitoring.MetricsConfig
@@ -20,7 +22,7 @@ import scala.concurrent.{Future, Promise}
 import scala.util.Random
 
 class CloudWatchMetricsTest
-    extends FunSpec
+    extends AnyFunSpec
     with MockitoSugar
     with Matchers
     with ScalaFutures
