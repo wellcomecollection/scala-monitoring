@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v3.0.0 - 2020-04-20
+
+Upgrade akka and scalatest
+
 ## v2.4.0 - 2019-07-08
 
 Bump the versions of underlying libraries, plus tidy up the code to follow our new patterns.
