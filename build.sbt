@@ -1,5 +1,5 @@
 val projectName = "monitoring"
-val projectVersion = "3.0.0"
+val projectVersion = "4.0.0"
 
 
 

@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v4.0.0 - 2020-04-21
+
+Upgrade aws library
+
 ## v3.0.0 - 2020-04-20
 
 Upgrade akka and scalatest
