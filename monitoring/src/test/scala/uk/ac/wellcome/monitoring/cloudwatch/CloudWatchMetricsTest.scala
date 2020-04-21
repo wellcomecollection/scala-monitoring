@@ -3,14 +3,14 @@ package uk.ac.wellcome.monitoring.cloudwatch
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
-import com.amazonaws.services.cloudwatch.AmazonCloudWatch
-import com.amazonaws.services.cloudwatch.model.{PutMetricDataRequest, StandardUnit}
 import org.mockito.ArgumentCaptor
-import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
 import org.scalatest.Assertion
+import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.mockito.MockitoSugar
+import software.amazon.awssdk.services.cloudwatch.CloudWatchClient
+import software.amazon.awssdk.services.cloudwatch.model.{PutMetricDataRequest, StandardUnit}
 import uk.ac.wellcome.akka.fixtures.Akka
 import uk.ac.wellcome.fixtures.TestWith
 import uk.ac.wellcome.monitoring.MetricsConfig
@@ -33,20 +33,20 @@ class CloudWatchMetricsTest
   import org.mockito.Mockito._
 
   it("counts a metric") {
-    val amazonCloudWatch = mock[AmazonCloudWatch]
+    val amazonCloudWatch = mock[CloudWatchClient]
     withMetricsSender(amazonCloudWatch) { metricsSender =>
       val metricName = createMetricName
 
       val future = metricsSender.incrementCount(metricName)
 
       whenReady(future) { _ =>
-        assertSingleDataPoint(amazonCloudWatch, metricName, maybeExpectedUnit = Some("Count"))
+        assertSingleDataPoint(amazonCloudWatch, metricName, maybeExpectedUnit = Some(StandardUnit.COUNT))
       }
     }
   }
 
   it("records a value metric") {
-    val amazonCloudWatch = mock[AmazonCloudWatch]
+    val amazonCloudWatch = mock[CloudWatchClient]
     withMetricsSender(amazonCloudWatch) { metricsSender =>
       val metricName = createMetricName
 
@@ -59,20 +59,20 @@ class CloudWatchMetricsTest
   }
 
   it("records a value metric with a unit") {
-    val amazonCloudWatch = mock[AmazonCloudWatch]
+    val amazonCloudWatch = mock[CloudWatchClient]
     withMetricsSender(amazonCloudWatch) { metricsSender =>
       val metricName = createMetricName
 
-      val future = metricsSender.recordValue(metricName, 11.0, Some(StandardUnit.Seconds))
+      val future = metricsSender.recordValue(metricName, 11.0, Some(StandardUnit.SECONDS))
 
       whenReady(future) { _ =>
-        assertSingleDataPoint(amazonCloudWatch, metricName, 11.0, Some("Seconds"))
+        assertSingleDataPoint(amazonCloudWatch, metricName, 11.0, Some(StandardUnit.SECONDS))
       }
     }
   }
 
   it("groups 20 MetricDatum into one PutMetricDataRequest") {
-    val amazonCloudWatch = mock[AmazonCloudWatch]
+    val amazonCloudWatch = mock[CloudWatchClient]
     withMetricsSender(amazonCloudWatch) { metricsSender =>
       val capture = ArgumentCaptor.forClass(classOf[PutMetricDataRequest])
 
@@ -88,15 +88,15 @@ class CloudWatchMetricsTest
           val putMetricDataRequests = capture.getAllValues
           putMetricDataRequests should have size 2
 
-          putMetricDataRequests.asScala.head.getMetricData should have size 20
-          putMetricDataRequests.asScala.tail.head.getMetricData should have size 20
+          putMetricDataRequests.asScala.head.metricData() should have size 20
+          putMetricDataRequests.asScala.tail.head.metricData() should have size 20
         }
       }
     }
   }
 
   it("takes at least one second to make 150 PutMetricData requests") {
-    val amazonCloudWatch = mock[AmazonCloudWatch]
+    val amazonCloudWatch = mock[CloudWatchClient]
     withMetricsSender(amazonCloudWatch) { metricsSender =>
       val capture = ArgumentCaptor.forClass(classOf[PutMetricDataRequest])
 
@@ -136,14 +136,8 @@ class CloudWatchMetricsTest
   private def createMetricName: String =
     (Random.alphanumeric take 10 mkString) toLowerCase
 
-  private val cloudWatchClient: AmazonCloudWatch =
-    CloudWatchClientFactory.create(
-      region = "eu-west-1",
-      endpoint = "http://localhost:4582"
-    )
-
   private def withMetricsSender[R](
-    cloudWatchClient: AmazonCloudWatch = cloudWatchClient)(
+    cloudWatchClient: CloudWatchClient)(
     testWith: TestWith[CloudWatchMetrics, R]): R =
     withActorSystem { actorSystem =>
       withMaterializer(actorSystem) { implicit materializer =>
@@ -159,23 +153,23 @@ class CloudWatchMetricsTest
       }
     }
 
-  private def assertSingleDataPoint(amazonCloudWatch: AmazonCloudWatch,
+  private def assertSingleDataPoint(amazonCloudWatch: CloudWatchClient,
                                     metricName: String,
                                     expectedValue: Double = 1.0,
-                                    maybeExpectedUnit: Option[String] = None): Assertion = {
+                                    maybeExpectedUnit: Option[StandardUnit] = None): Assertion = {
     val capture = ArgumentCaptor.forClass(classOf[PutMetricDataRequest])
     eventually {
       verify(amazonCloudWatch, times(1)).putMetricData(capture.capture())
 
       val putMetricDataRequest = capture.getValue
-      val metricData = putMetricDataRequest.getMetricData
+      val metricData = putMetricDataRequest.metricData()
       metricData should have size 1
       val metricDatum = metricData.asScala.head
-      metricDatum.getValue shouldBe expectedValue
+      metricDatum.value() shouldBe expectedValue
       maybeExpectedUnit.foreach { expectedUnit =>
-        metricDatum.getUnit shouldBe expectedUnit
+        metricDatum.unit() shouldBe expectedUnit
       }
-      metricDatum.getMetricName shouldBe metricName
+      metricDatum.metricName() shouldBe metricName
     }
   }
 }
