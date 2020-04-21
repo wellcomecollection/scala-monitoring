@@ -17,7 +17,7 @@ class MemoryMetrics[MetricUnit]() extends Metrics[Future, MetricUnit] {
   override def recordValue(metricName: String,
                            value: Double,
                            maybeUnit: Option[MetricUnit]): Future[Unit] = {
-    recordedValues = recordedValues :+ (metricName, value, maybeUnit)
+    recordedValues = recordedValues :+ ((metricName, value, maybeUnit))
     Future.successful(())
   }
 }

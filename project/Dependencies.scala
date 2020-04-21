@@ -19,7 +19,7 @@ object WellcomeDependencies {
 
 object Dependencies {
   lazy val versions = new {
-    val aws = "1.11.225"
+    val aws = "2.11.14"
     val mockito = "1.10.19"
     val scalatest = "3.1.1"
     val scalatestplusMockito = "3.1.0.0"
@@ -32,7 +32,7 @@ object Dependencies {
   )
 
   val libraryDependencies: Seq[ModuleID] = Seq(
-    "com.amazonaws" % "aws-java-sdk-cloudwatch" % versions.aws
+    "software.amazon.awssdk" % "cloudwatch" % versions.aws
   ) ++
     testDependencies ++
     WellcomeDependencies.fixturesLibrary ++

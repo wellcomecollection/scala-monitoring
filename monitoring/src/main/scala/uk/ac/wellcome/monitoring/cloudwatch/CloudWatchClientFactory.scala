@@ -1,21 +1,19 @@
 package uk.ac.wellcome.monitoring.cloudwatch
 
-import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration
-import com.amazonaws.services.cloudwatch.{
-  AmazonCloudWatch,
-  AmazonCloudWatchClientBuilder
-}
+import java.net.URI
+
+import software.amazon.awssdk.regions.Region
+import software.amazon.awssdk.services.cloudwatch.CloudWatchClient
 
 object CloudWatchClientFactory {
-  def create(region: String, endpoint: String): AmazonCloudWatch = {
-    val standardClient = AmazonCloudWatchClientBuilder.standard
-    if (endpoint.isEmpty)
-      standardClient
-        .withRegion(region)
+  def create(region: String, endpoint: Option[URI]): CloudWatchClient = {
+    val standardClient = CloudWatchClient.builder()
+    endpoint match {
+      case None =>  standardClient
+        .region(Region.of(region))
         .build()
-    else
-      standardClient
-        .withEndpointConfiguration(new EndpointConfiguration(endpoint, region))
+      case Some(e) => standardClient.endpointOverride(e)
         .build()
+    }
   }
 }

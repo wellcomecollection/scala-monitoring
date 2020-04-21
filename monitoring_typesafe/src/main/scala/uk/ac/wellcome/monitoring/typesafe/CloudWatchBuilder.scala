@@ -1,14 +1,13 @@
 package uk.ac.wellcome.monitoring.typesafe
 
-import akka.stream.ActorMaterializer
-import com.amazonaws.services.cloudwatch.AmazonCloudWatch
+import java.net.URI
+
+import akka.stream.Materializer
 import com.typesafe.config.Config
+import software.amazon.awssdk.services.cloudwatch.CloudWatchClient
 import uk.ac.wellcome.config.models.AWSClientConfig
 import uk.ac.wellcome.monitoring.MetricsConfig
-import uk.ac.wellcome.monitoring.cloudwatch.{
-  CloudWatchClientFactory,
-  CloudWatchMetrics
-}
+import uk.ac.wellcome.monitoring.cloudwatch.{CloudWatchClientFactory, CloudWatchMetrics}
 import uk.ac.wellcome.monitoring.typesafe.MetricsBuilder.buildMetricsConfig
 import uk.ac.wellcome.typesafe.config.builders.AWSClientConfigBuilder
 
@@ -16,22 +15,22 @@ import scala.concurrent.ExecutionContext
 
 object CloudWatchBuilder extends AWSClientConfigBuilder {
   private def buildCloudWatchClient(
-    awsClientConfig: AWSClientConfig): AmazonCloudWatch =
+    awsClientConfig: AWSClientConfig): CloudWatchClient =
     CloudWatchClientFactory.create(
       region = awsClientConfig.region,
-      endpoint = awsClientConfig.endpoint.getOrElse("")
+      endpoint = awsClientConfig.endpoint.map(new URI(_))
     )
 
-  def buildCloudWatchClient(config: Config): AmazonCloudWatch =
+  def buildCloudWatchClient(config: Config): CloudWatchClient =
     buildCloudWatchClient(
       awsClientConfig = buildAWSClientConfig(config, namespace = "cloudwatch")
     )
 
   private def buildCloudWatchMetrics(
-    cloudWatchClient: AmazonCloudWatch,
+    cloudWatchClient: CloudWatchClient,
     metricsConfig: MetricsConfig
   )(implicit
-    materializer: ActorMaterializer,
+    materializer: Materializer,
     ec: ExecutionContext): CloudWatchMetrics =
     new CloudWatchMetrics(
       cloudWatchClient = cloudWatchClient,
@@ -40,7 +39,7 @@ object CloudWatchBuilder extends AWSClientConfigBuilder {
 
   def buildCloudWatchMetrics(config: Config)(
     implicit
-    materializer: ActorMaterializer,
+    materializer: Materializer,
     ec: ExecutionContext): CloudWatchMetrics =
     buildCloudWatchMetrics(
       cloudWatchClient = CloudWatchBuilder.buildCloudWatchClient(config),
