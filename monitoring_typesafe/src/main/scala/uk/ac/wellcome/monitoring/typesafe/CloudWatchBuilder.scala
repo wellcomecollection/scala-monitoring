@@ -7,7 +7,10 @@ import com.typesafe.config.Config
 import software.amazon.awssdk.services.cloudwatch.CloudWatchClient
 import uk.ac.wellcome.config.models.AWSClientConfig
 import uk.ac.wellcome.monitoring.MetricsConfig
-import uk.ac.wellcome.monitoring.cloudwatch.{CloudWatchClientFactory, CloudWatchMetrics}
+import uk.ac.wellcome.monitoring.cloudwatch.{
+  CloudWatchClientFactory,
+  CloudWatchMetrics
+}
 import uk.ac.wellcome.monitoring.typesafe.MetricsBuilder.buildMetricsConfig
 import uk.ac.wellcome.typesafe.config.builders.AWSClientConfigBuilder
 

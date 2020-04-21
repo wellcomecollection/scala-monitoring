@@ -7,7 +7,11 @@ import akka.stream.{Materializer, OverflowStrategy, ThrottleMode}
 import akka.{Done, NotUsed}
 import grizzled.slf4j.Logging
 import software.amazon.awssdk.services.cloudwatch.CloudWatchClient
-import software.amazon.awssdk.services.cloudwatch.model.{MetricDatum, PutMetricDataRequest, StandardUnit}
+import software.amazon.awssdk.services.cloudwatch.model.{
+  MetricDatum,
+  PutMetricDataRequest,
+  StandardUnit
+}
 import uk.ac.wellcome.monitoring.{Metrics, MetricsConfig}
 
 import scala.collection.immutable
@@ -30,8 +34,11 @@ class CloudWatchMetrics(cloudWatchClient: CloudWatchClient,
   val sink: Sink[Seq[MetricDatum], Future[Done]] = Sink.foreach(
     metricDataSeq =>
       cloudWatchClient.putMetricData(
-        PutMetricDataRequest.builder().namespace(metricsConfig.namespace)
-          .metricData(metricDataSeq: _*).build()
+        PutMetricDataRequest
+          .builder()
+          .namespace(metricsConfig.namespace)
+          .metricData(metricDataSeq: _*)
+          .build()
     ))
 
   val source: Source[MetricDatum, SourceQueueWithComplete[MetricDatum]] =
@@ -59,11 +66,13 @@ class CloudWatchMetrics(cloudWatchClient: CloudWatchClient,
       .run()
 
   override def incrementCount(metricName: String): Future[Unit] = {
-    val metricDatum = MetricDatum.builder()
+    val metricDatum = MetricDatum
+      .builder()
       .metricName(metricName)
       .value(1.0)
       .unit(StandardUnit.COUNT)
-      .timestamp(Instant.now()).build()
+      .timestamp(Instant.now())
+      .build()
 
     sourceQueue.offer(metricDatum).map { _ =>
       ()
@@ -73,12 +82,14 @@ class CloudWatchMetrics(cloudWatchClient: CloudWatchClient,
   override def recordValue(metricName: String,
                            value: Double,
                            maybeUnit: Option[StandardUnit]): Future[Unit] = {
-    val metricDatumBuilder = MetricDatum.builder()
+    val metricDatumBuilder = MetricDatum
+      .builder()
       .metricName(metricName)
       .value(value)
       .timestamp(Instant.now())
 
-    val metricDatum = maybeUnit.fold(metricDatumBuilder.build())(unit => metricDatumBuilder.unit(unit).build())
+    val metricDatum = maybeUnit.fold(metricDatumBuilder.build())(unit =>
+      metricDatumBuilder.unit(unit).build())
 
     sourceQueue.offer(metricDatum).map { _ =>
       ()
